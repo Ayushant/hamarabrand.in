@@ -1,0 +1,16 @@
+{
+  "buildCommand": "",
+  "devCommand": "",
+  "installCommand": "",
+  "framework": null,
+  "public": true,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/code.html",
+      "destination": "/",
+      "permanent": true
+    }
+  ]
+}
