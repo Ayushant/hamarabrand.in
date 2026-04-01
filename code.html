@@ -3,9 +3,11 @@
 <html class="light" lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <link rel="icon" type="image/png" href="hbl.png" />
+   <meta charset="utf-8" />
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+<!-- Favicon fix -->
+<link rel="icon" type="image/x-icon" href="favicon.ico?v=6" />
     <title>Hamara Brand | Enterprise Transit Media Marketplace</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap"
@@ -140,10 +142,21 @@
                     Brand</span>
             </div>
 
-            <button id="get-started-btn" type="button"
-                class="bg-primary text-on-primary px-6 py-2.5 rounded-md font-bold text-sm kinetic-gradient active:scale-95 transform transition-all shadow-lg shadow-primary/20">
-                Get Started
-            </button>
+            <div class="flex items-center gap-2 md:gap-4">
+                <!-- <div id="google_translate_element" style="display: none;"></div>
+                <div class="relative flex items-center gap-1 bg-surface-container-highest px-3 py-1.5 rounded-full border border-outline-variant/50 hover:border-primary/50 transition-colors cursor-pointer group shadow-sm">
+                    <span class="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-primary transition-colors" data-icon="translate">translate</span>
+                    <select id="custom-lang-dropdown" class="bg-transparent border-none text-xs font-bold text-on-surface-variant group-hover:text-primary cursor-pointer focus:ring-0 p-0 pr-4 appearance-none outline-none leading-none" style="text-align-last: center;">
+                        <option value="en">English</option>
+                        <option value="hi">हिंदी</option>
+                    </select>
+                    <span class="material-symbols-outlined text-[14px] absolute right-2 text-on-surface-variant pointer-events-none" data-icon="expand_more">expand_more</span>
+                </div> -->
+                <button id="get-started-btn" type="button"
+                    class="bg-primary text-on-primary px-6 py-2.5 rounded-md font-bold text-sm kinetic-gradient active:scale-95 transform transition-all shadow-lg shadow-primary/20">
+                    Get Started
+                </button>
+            </div>
         </div>
     </header>
     <main class="pt-2">
@@ -158,16 +171,36 @@
                                 class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
                         </span>
-                        Enterprise Grade Media
+                        India's No.1 All Media Marketplace
                     </div>
                     <h1
                         class="text-5xl lg:text-7xl font-black text-on-surface tracking-tighter leading-[0.95] lg:max-w-2xl">
-                        Scale Transit ROI with <span class="text-primary italic">Precision</span>
+                        Put Your Brand on 10,000+ <span class="text-primary italic">Buses, Autos & Cabs</span>
                     </h1>
-                    <p class="text-lg text-on-surface-variant max-w-xl leading-relaxed">
-                        The ultimate B2B marketplace for pan-India transit media. Access 10,000+ verified spots across
-                        120 cities with real-time audit logs and performance analytics.
+                    <!-- <p class="text-lg text-on-surface-variant max-w-xl leading-relaxed">
+                        across India Verified Rates, Pan-India Reach
+                    </p> -->
+                    <p class="text-sm text-on-surface-variant max-w-xl">
+                        Used by KEI Wires, Ghadi Detergent, ASG Eye Hospital, Jubilant Foods & 700+ brands
                     </p>
+                    <div class="flex flex-wrap gap-6 mt-8">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-lg">verified</span>
+                            <span class="text-xs font-medium text-on-surface">Verified media vendors</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-lg">trending_up</span>
+                            <span class="text-xs font-medium text-on-surface">Best market rates</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-lg">public</span>
+                            <span class="text-xs font-medium text-on-surface">Pan-India execution</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-lg">schedule</span>
+                            <span class="text-xs font-medium text-on-surface">Proposal in 24 hours</span>
+                        </div>
+                    </div>
                     <!-- Trust stats removed -->
                 </div>
                 <!-- Lead Gen Module -->
@@ -597,12 +630,12 @@
                             or social media. Looking forward to hearing from you!</p>
 
                         <div class="flex gap-4 pt-4">
-                            <a href="#"
+                            <button id="contact-share-btn"
                                 class="w-12 h-12 rounded-full border border-outline-variant/50 hover:border-primary hover:bg-primary/5 text-on-surface-variant hover:text-primary flex items-center justify-center transition-all group">
                                 <span
                                     class="material-symbols-outlined text-lg group-hover:scale-110 transition-transform"
                                     data-icon="share">share</span>
-                            </a>
+                            </button>
                             <a href="#"
                                 class="w-12 h-12 rounded-full border border-outline-variant/50 hover:border-primary hover:bg-primary/5 text-on-surface-variant hover:text-primary flex items-center justify-center transition-all group">
                                 <span
@@ -715,59 +748,81 @@
             <p class="text-slate-500 dark:text-slate-400 text-xs">© Hamara Brand
             </p>
             <div class="flex gap-6">
-                <span
+                <span id="footer-share-btn"
                     class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-green-600 transition-colors"
-                    data-icon="share">share</span>
-                <span
+                    data-icon="share" title="Share">share</span>
+                <span id="footer-language-btn"
                     class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-green-600 transition-colors"
-                    data-icon="language">language</span>
+                    data-icon="language" title="Translate">language</span>
             </div>
         </div>
     </footer>
 
     <!-- Lead Gen Modal -->
-    <div id="lead-gen-modal" class="fixed inset-0 z-[100] hidden bg-black/50 backdrop-blur-sm transition-opacity overflow-y-auto">
+    <div id="lead-gen-modal"
+        class="fixed inset-0 z-[100] hidden bg-black/50 backdrop-blur-sm transition-opacity overflow-y-auto">
         <div class="flex min-h-[100dvh] items-center justify-center p-4">
-            <div class="bg-surface-container-lowest p-6 sm:p-8 rounded-2xl shadow-2xl border border-outline-variant/10 relative w-full border-t-[8px] border-t-primary max-w-lg">
-            <button id="close-modal-btn" class="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface">
-                <span class="material-symbols-outlined" data-icon="close">close</span>
-            </button>
-            <h3 class="text-2xl font-bold mb-6 tracking-tight text-on-surface">Request Custom Proposal</h3>
-            <form id="lead-gen-modal-form" class="space-y-4">
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Your name</label>
-                    <input name="name" class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm" placeholder="e.g. Rahul Sharma" type="text" required />
-                </div>
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Company name</label>
-                    <input name="company" class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm" placeholder="e.g. ABC Pvt. Ltd." type="text" required />
-                </div>
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Phone number</label>
-                    <input name="phone" class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm" placeholder="e.g. +91 98765 43210" type="tel" required />
-                </div>
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Service needed</label>
-                    <input name="service" id="modal-service-needed" class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm" placeholder="e.g. Bus back panel" type="text" required />
-                </div>
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Target city</label>
-                    <input name="city" id="modal-target-city" class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm" placeholder="e.g. Mumbai" type="text" required />
-                </div>
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Monthly budget</label>
-                    <select name="budget" class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm appearance-none" required>
-                        <option value="" disabled selected>Select Budget Range</option>
-                        <option value="₹50,000 – ₹2,00,000">₹50,000 – ₹2,00,000</option>
-                        <option value="₹2,00,000 – ₹5,00,000">₹2,00,000 – ₹5,00,000</option>
-                        <option value="₹5,00,000+">₹5,00,000+</option>
-                    </select>
-                </div>
-                <button type="submit" class="w-full kinetic-gradient text-on-primary font-bold py-4 rounded-md shadow-lg shadow-primary/30 mt-4 active:scale-95 transform transition-all">
-                    Submit Request
+            <div
+                class="bg-surface-container-lowest p-6 sm:p-8 rounded-2xl shadow-2xl border border-outline-variant/10 relative w-full border-t-[8px] border-t-primary max-w-lg">
+                <button id="close-modal-btn"
+                    class="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface">
+                    <span class="material-symbols-outlined" data-icon="close">close</span>
                 </button>
-            </form>
-        </div>
+                <h3 class="text-2xl font-bold mb-6 tracking-tight text-on-surface">Request Custom Proposal</h3>
+                <form id="lead-gen-modal-form" class="space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Your
+                            name</label>
+                        <input name="name"
+                            class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
+                            placeholder="e.g. Rahul Sharma" type="text" required />
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Company
+                            name</label>
+                        <input name="company"
+                            class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
+                            placeholder="e.g. ABC Pvt. Ltd." type="text" required />
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Phone
+                            number</label>
+                        <input name="phone"
+                            class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
+                            placeholder="e.g. +91 98765 43210" type="tel" required />
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Service
+                            needed</label>
+                        <input name="service" id="modal-service-needed"
+                            class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
+                            placeholder="e.g. Bus back panel" type="text" required />
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Target
+                            city</label>
+                        <input name="city" id="modal-target-city"
+                            class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
+                            placeholder="e.g. Mumbai" type="text" required />
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Monthly
+                            budget</label>
+                        <select name="budget"
+                            class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm appearance-none"
+                            required>
+                            <option value="" disabled selected>Select Budget Range</option>
+                            <option value="₹50,000 – ₹2,00,000">₹50,000 – ₹2,00,000</option>
+                            <option value="₹2,00,000 – ₹5,00,000">₹2,00,000 – ₹5,00,000</option>
+                            <option value="₹5,00,000+">₹5,00,000+</option>
+                        </select>
+                    </div>
+                    <button type="submit"
+                        class="w-full kinetic-gradient text-on-primary font-bold py-4 rounded-md shadow-lg shadow-primary/30 mt-4 active:scale-95 transform transition-all">
+                        Submit Request
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -777,10 +832,10 @@
         const deployCampaignForm = document.getElementById('deploy-campaign-form');
         const modal = document.getElementById('lead-gen-modal');
         const closeModalBtn = document.getElementById('close-modal-btn');
-        
+
         const targetCitiesInput = document.getElementById('target-cities-input');
         const mediaTypeSelect = document.getElementById('media-type-select');
-        
+
         const modalServiceNeeded = document.getElementById('modal-service-needed');
         const modalTargetCity = document.getElementById('modal-target-city');
 
@@ -814,14 +869,14 @@
                 closeModal();
             }
         });
-        
+
         document.getElementById('lead-gen-modal-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            
+
             const form = e.target;
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.innerText;
-            
+
             const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwAmu16ifunplSMyFl2JDRoBWoT3z7-C792refTZAfFHU-9adeaPx7eMBhwotWY7hRWg/exec';
 
             submitBtn.innerText = 'Submitting...';
@@ -869,7 +924,436 @@
                 form.reset();
             }, 2000);
         });
+
+        // Share button
+        document.getElementById('footer-share-btn').addEventListener('click', async () => {
+            const shareData = {
+                title: 'Hamara Brand | Enterprise Transit Media Marketplace',
+                text: 'Check out Hamara Brand — the premier marketplace for transit media assets across India.',
+                url: window.location.href
+            };
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    // User cancelled share
+                }
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Link copied to clipboard!');
+                });
+            }
+        });
+
+        // Contact share button (same functionality as footer)
+        document.getElementById('contact-share-btn').addEventListener('click', async () => {
+            const shareData = {
+                title: 'Hamara Brand | Enterprise Transit Media Marketplace',
+                text: 'Check out Hamara Brand — the premier marketplace for transit media assets across India.',
+                url: window.location.href
+            };
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    // User cancelled share
+                }
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Link copied to clipboard!');
+                });
+            }
+        });
+
+        document.getElementById('custom-lang-dropdown').addEventListener('change', function () {
+            const googSelect = document.querySelector('.goog-te-combo');
+            if (googSelect) {
+                googSelect.value = this.value;
+                googSelect.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+            }
+        });
+
+        // Language / Translate button
+        document.getElementById('footer-language-btn').addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const customDropdown = document.getElementById('custom-lang-dropdown').parentElement;
+            if (customDropdown) {
+                customDropdown.style.transition = 'box-shadow 0.3s ease';
+                customDropdown.style.boxShadow = '0 0 0 4px rgba(0, 110, 42, 0.3)';
+                setTimeout(() => { customDropdown.style.boxShadow = 'none'; }, 2000);
+            }
+        });
     </script>
+
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'hi,en',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript"
+        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <style>
+        .goog-te-banner-frame.skiptranslate,
+        .goog-logo-link,
+        #goog-gt-tt,
+        .goog-te-balloon-frame {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        body {
+            top: 0px !important;
+            position: static !important;
+        }
+
+        .goog-text-highlight {
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        #google_translate_element {
+            display: none !important;
+        }
+
+        /* CHATBOT STYLES COMMENTED OUT
+        .chatbot-widget {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .chatbot-button {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #006e2a 0%, #00c853 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 110, 42, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 24px;
+        }
+
+        .chatbot-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 110, 42, 0.4);
+        }
+
+        .chatbot-button.open {
+            display: none;
+        }
+
+        .chatbot-container {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 380px;
+            max-height: 600px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .chatbot-container.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #006e2a 0%, #00c853 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: #fafafa;
+            height: 340px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chatbot-message {
+            display: flex;
+            gap: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chatbot-message.user {
+            justify-content: flex-end;
+        }
+
+        .chatbot-message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 280px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .bot .message-content {
+            background: white;
+            color: #1a1c1d;
+            border: 1px solid #e0e0e0;
+        }
+
+        .user .message-content {
+            background: linear-gradient(135deg, #006e2a 0%, #00c853 100%);
+            color: white;
+            border-radius: 8px 0 8px 8px;
+        }
+
+        .chatbot-input-area {
+            padding: 12px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .chatbot-input:focus {
+            border-color: #006e2a;
+            box-shadow: 0 0 0 2px rgba(0, 110, 42, 0.1);
+        }
+
+        .chatbot-send {
+            background: linear-gradient(135deg, #006e2a 0%, #00c853 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .chatbot-send:hover {
+            transform: scale(1.05);
+        }
+
+        .chatbot-send:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 480px) {
+            .chatbot-widget {
+                bottom: 16px;
+                right: 16px;
+            }
+
+            .chatbot-container {
+                width: calc(100vw - 32px);
+                max-height: 60vh;
+                bottom: 72px;
+            }
+
+            .chatbot-messages {
+                height: auto;
+                max-height: calc(60vh - 140px);
+            }
+        }
+        */
+    </style>
+
+    <!-- CHATBOT WIDGET COMMENTED OUT
+    <div class="chatbot-widget">
+        <button class="chatbot-button" id="chatbot-toggle" title="Chat with us">💬</button>
+        <div class="chatbot-container" id="chatbot-container">
+            <div class="chatbot-header">
+                <h3>Hamara Brand Assistant</h3>
+                <button class="chatbot-close" id="chatbot-close">✕</button>
+            </div>
+            <div class="chatbot-messages" id="chatbot-messages"></div>
+            <div class="chatbot-input-area">
+                <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask me anything..." />
+                <button class="chatbot-send" id="chatbot-send">➤</button>
+            </div>
+        </div>
+    </div>
+    -->
+
+    <!-- CHATBOT JAVASCRIPT COMMENTED OUT
+    <script>
+        const chatbotToggle = document.getElementById('chatbot-toggle');
+        const chatbotClose = document.getElementById('chatbot-close');
+        const chatbotContainer = document.getElementById('chatbot-container');
+        const chatbotInput = document.getElementById('chatbot-input');
+        const chatbotSend = document.getElementById('chatbot-send');
+        const chatbotMessages = document.getElementById('chatbot-messages');
+
+        // Chatbot knowledge base with context
+        const chatbotResponses = {
+            services: {
+                keywords: ['service', 'what do you offer', 'offer', 'media', 'advertising', 'ad', 'campaign'],
+                response: `We offer **Premium Transit Media Assets**:\n\n🛺 **Auto Hood Branding** - From ₹5,000/month\n🚌 **Bus Side Panels** - From ₹50,000/month\n🚍 **Bus Back Panels** - From ₹30,000/month\n✦ **Full Bus Wraps** - High impact branding\n🚕 **Cab Branding** - Mobile advertising\n🎯 **PR & Brand Name** - Custom solutions\n\nAll with verified rates and pan-India execution!`
+            },
+            pricing: {
+                keywords: ['price', 'cost', 'rate', 'how much', 'rupees', '₹'],
+                response: `Our pricing is **flexible and transparent**:\n\n💰 **Starting from ₹5,000/month** for auto branding\n💰 **₹30,000-₹50,000/month** for bus advertising\n💰 **Best market rates** guaranteed\n\nGet a **custom proposal in 24 hours**! Each campaign is tailored to your budget and reach requirements.`
+            },
+            locations: {
+                keywords: ['city', 'location', 'where', 'coverage', 'cities', 'delhi', 'mumbai', 'bangalore', 'india'],
+                response: `We operate **Pan-India** with verified media vendors!\n\n🌍 Coverage across all major cities:\n- Mumbai, Delhi, Bangalore\n- Kolkata, Chennai, Hyderabad\n- And 100+ other cities\n\nQuickly deploy campaigns to your **target cities** with our platform.`
+            },
+            getStarted: {
+                keywords: ['how to start', 'begin', 'register', 'signup', 'deploy', 'campaign', 'propose'],
+                response: `Getting started is **easy**!\n\n1️⃣ **Fill the form** on our homepage\n2️⃣ **Select your cities & media type**\n3️⃣ **Choose units & duration**\n4️⃣ **Generate Custom Proposal**\n\nOur **Dedicated Media Strategist** will contact you within **2 business hours**!`
+            },
+            company: {
+                keywords: ['who are you', 'about', 'company', 'trusted', 'why', 'clients'],
+                response: `**Hamara Brand** - India's #1 All Media Marketplace!\n\n✅ **700+ Happy Customers**\n✅ **80+ Team Members**\n✅ **500+ Finished Projects**\n✅ **5+ Awards Winning**\n\nTrusted by: KEI Wires, Ghadi Detergent, ASG Eye Hospital, Jubilant Foods, and 700+ more brands!`
+            },
+            features: {
+                keywords: ['feature', 'benefit', 'advantage', 'why choose', 'verified', 'rates'],
+                response: `Why choose **Hamara Brand**?\n\n✔️ **Verified Media Vendors** - Quality assured\n✔️ **Best Market Rates** - Competitive pricing\n✔️ **Pan-India Execution** - Nationwide reach\n✔️ **Proposal in 24 hours** - Fast turnaround\n✔️ **Dedicated Strategist** - Expert support\n\nYour brand deserves premium visibility!`
+            },
+            contact: {
+                keywords: ['contact', 'phone', 'email', 'call', 'reach out', 'support'],
+                response: `📞 **Contact Us**\n\nVisit our platform: **myonventure.com**\n\nOr fill the **"Deploy Your Campaign"** form on this page to get connected with our team.\n\nWe're here to help! 🚀`
+            },
+            default: `Hi! 👋 I'm the **Hamara Brand Assistant**. I can help you with:\n\n• Our services & pricing\n• Coverage areas\n• How to deploy campaigns\n• Company information\n\nWhat would you like to know?`
+        };
+
+        function findResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+
+            // Check each category
+            for (const [key, data] of Object.entries(chatbotResponses)) {
+                if (key === 'default') continue;
+                if (data.keywords.some(keyword => lowerMessage.includes(keyword))) {
+                    return data.response;
+                }
+            }
+
+            return chatbotResponses.default.response;
+        }
+
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chatbot-message ${isUser ? 'user' : 'bot'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            messageDiv.appendChild(contentDiv);
+            chatbotMessages.appendChild(messageDiv);
+            
+            // Auto-scroll to bottom
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+
+        function handleSendMessage() {
+            const userText = chatbotInput.value.trim();
+            if (!userText) return;
+
+            // Add user message
+            addMessage(userText, true);
+            chatbotInput.value = '';
+
+            // Add bot response after short delay
+            setTimeout(() => {
+                const response = findResponse(userText);
+                addMessage(response, false);
+            }, 300);
+        }
+
+        // Event listeners
+        chatbotToggle.addEventListener('click', () => {
+            chatbotContainer.classList.add('active');
+            chatbotToggle.classList.add('open');
+            chatbotInput.focus();
+            
+            // Add welcome message on first open
+            if (chatbotMessages.children.length === 0) {
+                addMessage(chatbotResponses.default);
+            }
+        });
+
+        chatbotClose.addEventListener('click', () => {
+            chatbotContainer.classList.remove('active');
+            chatbotToggle.classList.remove('open');
+        });
+
+        chatbotSend.addEventListener('click', handleSendMessage);
+        chatbotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSendMessage();
+        });
+    </script>
+    -->
 </body>
 
 </html>
