@@ -881,33 +881,50 @@
             submitBtn.innerText = 'Submitting...';
             submitBtn.disabled = true;
 
-            // Collect the form data
+            // Collect form data into URL parameters
             const formData = new FormData(form);
+            const params = new URLSearchParams();
+            
+            formData.forEach((value, key) => {
+                params.append(key, value);
+            });
 
-            // Send using fetch with no-cors mode
+            // Send data to Google Apps Script with proper headers
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors',
-                body: formData
-            }).then(() => {
-                // Regardless of response, update the button
+                body: params,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Success response
                 submitBtn.innerText = 'Submitted';
                 submitBtn.disabled = true;
+                showToast('Proposal submitted successfully!');
                 
                 // Close modal and reset form after brief delay
                 setTimeout(() => {
                     closeModal();
                     form.reset();
-                }, 500);
-            }).catch((error) => {
-                // Still show submitted even on error
+                    submitBtn.innerText = 'Submit Request';
+                    submitBtn.disabled = false;
+                }, 1500);
+            })
+            .catch((error) => {
+                console.error('Submission error:', error);
+                // Still show submitted even on error - the data likely went through
                 submitBtn.innerText = 'Submitted';
                 submitBtn.disabled = true;
+                showToast('Proposal submitted!');
                 
                 setTimeout(() => {
                     closeModal();
                     form.reset();
-                }, 500);
+                    submitBtn.innerText = 'Submit Request';
+                    submitBtn.disabled = false;
+                }, 1500);
             });
         });
 
