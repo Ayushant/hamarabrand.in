@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link rel="icon" type="image/png" href="hbl.png" />
+    <title>Hamara Brand | Enterprise Transit Media Marketplace</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error": "#ba1a1a",
+                        "background": "#f9f9fb",
+                        "on-secondary-fixed": "#3e001f",
+                        "inverse-surface": "#2f3132",
+                        "secondary": "#b40065",
+                        "surface-tint": "#006e2a",
+                        "on-surface-variant": "#3c4a3c",
+                        "surface-container-highest": "#e2e2e4",
+                        "surface-bright": "#f9f9fb",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#004c1b",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#f9f9fb",
+                        "surface-container-high": "#e8e8ea",
+                        "on-secondary-fixed-variant": "#8d004e",
+                        "tertiary": "#4c56af",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#bdc2ff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffd9e3",
+                        "primary-fixed-dim": "#3ce36a",
+                        "secondary-fixed-dim": "#ffb0ca",
+                        "on-tertiary-fixed-variant": "#343d96",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#fffbff",
+                        "on-primary-fixed-variant": "#00531e",
+                        "on-primary-fixed": "#002108",
+                        "surface-dim": "#d9dadc",
+                        "tertiary-container": "#9ea6ff",
+                        "tertiary-fixed": "#e0e0ff",
+                        "primary-container": "#00c853",
+                        "inverse-primary": "#3ce36a",
+                        "inverse-on-surface": "#f0f0f2",
+                        "surface-variant": "#e2e2e4",
+                        "on-tertiary-fixed": "#000767",
+                        "on-surface": "#1a1c1d",
+                        "on-tertiary-container": "#2d368f",
+                        "surface-container-low": "#f3f3f5",
+                        "on-background": "#1a1c1d",
+                        "on-error-container": "#93000a",
+                        "outline": "#6c7b6a",
+                        "primary-fixed": "#69ff87",
+                        "secondary-container": "#e10080",
+                        "outline-variant": "#bbcbb8",
+                        "primary": "#006e2a",
+                        "surface-container": "#eeeef0"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-nav {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .kinetic-gradient {
+            background: linear-gradient(135deg, #006e2a 0%, #00c853 100%);
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .animate-marquee {
+            animation: marquee 35s linear infinite;
+        }
+
+        .animate-marquee-reverse {
+            animation: marquee 40s linear infinite reverse;
+        }
+
+        .mask-horizontal {
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+    <!-- TopAppBar -->
+    <header
+        class="fixed top-0 w-full z-50 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm dark:shadow-none font-['Inter'] antialiased tracking-tight">
+        <div class="flex items-center justify-between px-6 py-0 max-w-7xl mx-auto">
+            <div class="flex items-center gap-1">
+                <img src="hbl.png" alt="HB Logo" class="w-auto object-contain" style="height:4.5rem" />
+                <span class="text-base md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Hamara
+                    Brand</span>
+            </div>
+
+            <button id="get-started-btn" type="button"
+                class="bg-primary text-on-primary px-6 py-2.5 rounded-md font-bold text-sm kinetic-gradient active:scale-95 transform transition-all shadow-lg shadow-primary/20">
+                Get Started
+            </button>
+        </div>
+    </header>
+    <main class="pt-2">
+        <!-- Hero Section & Lead Gen -->
+        <section class="relative px-6 py-20 lg:py-32 max-w-7xl mx-auto overflow-hidden">
+            <div class="grid lg:grid-cols-12 gap-16 items-center">
+                <div class="lg:col-span-7 space-y-8">
+                    <div
+                        class="inline-flex items-center gap-2 px-3 py-1 bg-secondary-fixed text-on-secondary-fixed-variant rounded-full text-xs font-bold tracking-widest uppercase">
+                        <span class="relative flex h-2 w-2">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+                        </span>
+                        Enterprise Grade Media
+                    </div>
+                    <h1
+                        class="text-5xl lg:text-7xl font-black text-on-surface tracking-tighter leading-[0.95] lg:max-w-2xl">
+                        Scale Transit ROI with <span class="text-primary italic">Precision</span>
+                    </h1>
+                    <p class="text-lg text-on-surface-variant max-w-xl leading-relaxed">
+                        The ultimate B2B marketplace for pan-India transit media. Access 10,000+ verified spots across
+                        120 cities with real-time audit logs and performance analytics.
+                    </p>
+                    <!-- Trust stats removed -->
+                </div>
+                <!-- Lead Gen Module -->
+                <div class="lg:col-span-5">
+                    <div
+                        class="bg-surface-container-lowest p-8 lg:p-10 rounded-xl shadow-2xl shadow-on-surface/5 border border-outline-variant/10 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16"></div>
+                        <h3 class="text-2xl font-bold mb-6 tracking-tight">Deploy Your Campaign</h3>
+                        <form id="deploy-campaign-form" class="space-y-4">
+                            <div class="space-y-1.5">
+                                <label
+                                    class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Target
+                                    Cities</label>
+                                <input id="target-cities-input"
+                                    class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
+                                    placeholder="e.g. Mumbai, Delhi, Bangalore" type="text" />
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Media
+                                    Type</label>
+                                <select id="media-type-select"
+                                    class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm appearance-none">
+                                    <option>Select Media Asset</option>
+                                    <option>Bus Side Panels</option>
+                                    <option>Metro Wraps</option>
+                                    <option>Airport Digital</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-1.5">
+                                    <label
+                                        class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Units</label>
+                                    <input
+                                        class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
+                                        placeholder="100" type="number" />
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label
+                                        class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Duration</label>
+                                    <input
+                                        class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
+                                        placeholder="3 Months" type="text" />
+                                </div>
+                            </div>
+                            <button
+                                class="w-full kinetic-gradient text-on-primary font-bold py-4 rounded-md shadow-lg shadow-primary/30 mt-4 active:scale-95 transform transition-all">
+                                Generate Custom Proposal
+                            </button>
+                        </form>
+                        <p class="text-[10px] text-center text-on-surface-variant mt-4 leading-tight">
+                            By proceeding, you agree to our Terms of Service. A Dedicated Media Strategist will contact
+                            you within 2 business hours.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Trust & Partners Section -->
+        <section class="bg-surface-container-low py-20 overflow-hidden">
+            <!-- Brand Partners -->
+            <div class="max-w-7xl mx-auto px-6 mb-8">
+                <h2 class="text-xl md:text-2xl font-black tracking-tighter text-on-surface uppercase drop-shadow-sm">
+                    TRUSTED BRAND PARTNERS</h2>
+                <h3 class="text-sm font-medium text-on-surface-variant mb-6">Enhancing their visual presence and market
+                    appeal.</h3>
+            </div>
+
+            <div class="flex overflow-hidden relative w-full mb-20 group mask-horizontal">
+                <div
+                    class="flex animate-marquee group-hover:[animation-play-state:paused] whitespace-nowrap items-center gap-16 px-8 shrink-0">
+                    <img class="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Joy_Personal_Care_logo.png"
+                        onerror="this.src='https://placehold.co/150x80/006e2a/fff?text=JOY'" alt="JOY" />
+                    <img class="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://upload.wikimedia.org/wikipedia/commons/1/18/Continental_logo.svg"
+                        onerror="this.src='https://placehold.co/180x80/ffa500/000?text=Continental'"
+                        alt="Continental" />
+                    <img class="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://placehold.co/180x80/666/fff?text=ORO+Precious+Metals" alt="ORO" />
+                    <img class="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Domino%27s_pizza_logo.svg"
+                        alt="Domino's" />
+                    <img class="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://logo.clearbit.com/tvsmotor.com"
+                        onerror="this.src='https://placehold.co/120x80/001a4e/fff?text=TVS'" alt="TVS" />
+                    <img class="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://logo.clearbit.com/bajajfinserv.in"
+                        onerror="this.src='https://placehold.co/180x80/005a9c/fff?text=BAJAJ+FINSERV'"
+                        alt="Bajaj Finserv" />
+                </div>
+                <!-- Duplicate array for seamless infinite looping -->
+                <div
+                    class="flex animate-marquee group-hover:[animation-play-state:paused] whitespace-nowrap items-center gap-16 px-8 shrink-0">
+                    <img class="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Joy_Personal_Care_logo.png"
+                        onerror="this.src='https://placehold.co/150x80/006e2a/fff?text=JOY'" alt="JOY" />
+                    <img class="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://upload.wikimedia.org/wikipedia/commons/1/18/Continental_logo.svg"
+                        onerror="this.src='https://placehold.co/180x80/ffa500/000?text=Continental'"
+                        alt="Continental" />
+                    <img class="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://placehold.co/180x80/666/fff?text=ORO+Precious+Metals" alt="ORO" />
+                    <img class="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Domino%27s_pizza_logo.svg"
+                        alt="Domino's" />
+                    <img class="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://logo.clearbit.com/tvsmotor.com"
+                        onerror="this.src='https://placehold.co/120x80/001a4e/fff?text=TVS'" alt="TVS" />
+                    <img class="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://logo.clearbit.com/bajajfinserv.in"
+                        onerror="this.src='https://placehold.co/180x80/005a9c/fff?text=BAJAJ+FINSERV'"
+                        alt="Bajaj Finserv" />
+                </div>
+            </div>
+
+            <!-- Recommended Allies -->
+            <div class="max-w-7xl mx-auto px-6 mb-8 mt-12">
+                <h2 class="text-xl md:text-2xl font-black tracking-tighter text-on-surface uppercase drop-shadow-sm">
+                    RECOMMENDED ALLIES.</h2>
+                <h3 class="text-sm font-medium text-on-surface-variant mb-6">Our best Associates.</h3>
+            </div>
+
+            <div class="flex overflow-hidden relative w-full mb-20 group mask-horizontal">
+                <div
+                    class="flex animate-marquee-reverse group-hover:[animation-play-state:paused] whitespace-nowrap items-center gap-16 px-8 shrink-0">
+                    <img class="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://placehold.co/200x80/e51e25/fff?text=SANGAM+ADVERTISERS" alt="Sangam Advertisers" />
+                    <img class="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://placehold.co/220x80/f6522c/fff?text=Singnath+Advertising" alt="Singnath" />
+                    <img class="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://placehold.co/180x80/fff/da291c?text=AVINASHI" alt="Avinashi" />
+                    <img class="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://logo.clearbit.com/timesooh.in"
+                        onerror="this.src='https://placehold.co/200x80/00adee/fff?text=TIMES+OOH'" alt="Times OOH" />
+                    <img class="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://placehold.co/180x80/1c3f94/fff?text=ARHAM" alt="Arham" />
+                    <img class="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://placehold.co/180x80/fff/d32f2f?text=BRIGHT" alt="Bright" />
+                </div>
+                <div
+                    class="flex animate-marquee-reverse group-hover:[animation-play-state:paused] whitespace-nowrap items-center gap-16 px-8 shrink-0">
+                    <img class="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://placehold.co/200x80/e51e25/fff?text=SANGAM+ADVERTISERS" alt="Sangam Advertisers" />
+                    <img class="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://placehold.co/220x80/f6522c/fff?text=Singnath+Advertising" alt="Singnath" />
+                    <img class="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://placehold.co/180x80/fff/da291c?text=AVINASHI" alt="Avinashi" />
+                    <img class="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://logo.clearbit.com/timesooh.in"
+                        onerror="this.src='https://placehold.co/200x80/00adee/fff?text=TIMES+OOH'" alt="Times OOH" />
+                    <img class="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://placehold.co/180x80/1c3f94/fff?text=ARHAM" alt="Arham" />
+                    <img class="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100"
+                        src="https://placehold.co/180x80/fff/d32f2f?text=BRIGHT" alt="Bright" />
+                </div>
+            </div>
+
+
+        </section>
+        <!-- Stats Grid (High Density) -->
+        <section class="py-24 max-w-7xl mx-auto px-6">
+            <div class="mb-16 grid lg:grid-cols-2 gap-12 lg:items-center">
+                <div class="space-y-4">
+                    <h2 class="text-3xl md:text-5xl font-black tracking-tighter text-on-surface leading-[1.1]">One
+                        powerful platform
+                        for every Media Category</h2>
+                    <h3 class="text-lg md:text-xl font-medium text-on-surface-variant">Plan, Book, and Scale your Brand
+                        Nationwide.</h3>
+                </div>
+
+                <div
+                    class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-6 md:p-8 shadow-sm relative overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 pointer-events-none">
+                    </div>
+                    <div class="text-xs font-bold text-primary tracking-widest uppercase mb-1">Our Main Platform</div>
+                    <a href="https://myonventure.com" target="_blank"
+                        class="text-2xl font-black text-on-surface hover:text-primary transition-colors flex items-center gap-2">
+                        myonventure.com <span class="material-symbols-outlined text-lg"
+                            data-icon="open_in_new">open_in_new</span>
+                    </a>
+                    <p class="text-on-surface-variant mt-2 text-sm leading-relaxed">Register as Media Buyers and
+                        Sellers.</p>
+                    <ul
+                        class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                        <li class="flex items-center gap-2"><span
+                                class="material-symbols-outlined text-primary text-[16px]"
+                                data-icon="check_circle">check_circle</span> Startups & SMEs</li>
+                        <li class="flex items-center gap-2"><span
+                                class="material-symbols-outlined text-primary text-[16px]"
+                                data-icon="check_circle">check_circle</span> Corporates & Enterprises</li>
+                        <li class="flex items-center gap-2"><span
+                                class="material-symbols-outlined text-primary text-[16px]"
+                                data-icon="check_circle">check_circle</span> PSU & Government</li>
+                        <li class="flex items-center gap-2"><span
+                                class="material-symbols-outlined text-primary text-[16px]"
+                                data-icon="check_circle">check_circle</span> Brand, Marketing & Media</li>
+                    </ul>
+                </div>
+            </div>
+            <div
+                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 px-1 bg-outline-variant/10 rounded-xl overflow-hidden">
+                <div class="bg-surface-container-lowest p-10 lg:p-12 flex flex-col items-start gap-4">
+                    <span class="text-secondary font-black text-5xl lg:text-6xl tracking-tighter">700+</span>
+                    <div class="space-y-1">
+                        <h4 class="text-lg font-bold text-on-surface leading-tight">Happy Customers</h4>
+                    </div>
+                </div>
+                <div class="bg-surface-container-lowest p-10 lg:p-12 flex flex-col items-start gap-4">
+                    <span class="text-primary font-black text-5xl lg:text-6xl tracking-tighter">80+</span>
+                    <div class="space-y-1">
+                        <h4 class="text-lg font-bold text-on-surface leading-tight">Team Members</h4>
+                    </div>
+                </div>
+                <div class="bg-surface-container-lowest p-10 lg:p-12 flex flex-col items-start gap-4">
+                    <span class="text-tertiary font-black text-5xl lg:text-6xl tracking-tighter">500+</span>
+                    <div class="space-y-1">
+                        <h4 class="text-lg font-bold text-on-surface leading-tight">Finished Projects</h4>
+                    </div>
+                </div>
+                <div class="bg-surface-container-lowest p-10 lg:p-12 flex flex-col items-start gap-4">
+                    <span class="text-primary-container font-black text-5xl lg:text-6xl tracking-tighter">5+</span>
+                    <div class="space-y-1">
+                        <h4 class="text-lg font-bold text-on-surface leading-tight">Awards Winning</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Services Directory -->
+        <section class="py-24 bg-surface relative">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                    <div class="space-y-4">
+                        <span class="text-primary font-bold tracking-widest uppercase text-xs">Our services click to
+                            enquire</span>
+                        <h2 class="text-4xl md:text-5xl font-black text-on-surface tracking-tighter leading-tight">
+                            Inventory Marketplace <br /> Premium Transit Assets</h2>
+                    </div>
+                    <div class="flex flex-wrap gap-4">
+                        <div
+                            class="px-4 py-2 bg-surface-container-high rounded text-sm font-semibold flex items-center gap-2 cursor-pointer hover:bg-surface-variant transition-colors">
+                            <span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span>
+                            All Categories
+                        </div>
+                        <div
+                            class="px-4 py-2 bg-surface-container-high rounded text-sm font-semibold flex items-center gap-2 cursor-pointer hover:bg-surface-variant transition-colors">
+                            <span class="material-symbols-outlined text-sm" data-icon="sort">sort</span>
+                            Pricing: Low to High
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Item 1 -->
+                    <a href="#"
+                        class="group bg-surface-container-low hover:bg-surface-container-lowest border border-outline-variant/20 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all p-8 rounded-2xl flex flex-col gap-6">
+                        <div
+                            class="text-5xl group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 origin-bottom-left">
+                            🛺</div>
+                        <div class="space-y-2">
+                            <h3 class="text-xl font-bold text-on-surface group-hover:text-primary transition-colors">
+                                Auto hood branding</h3>
+                            <div class="text-sm font-medium text-on-surface-variant">From <span
+                                    class="text-lg font-black text-on-surface">₹5,000</span>/month</div>
+                        </div>
+                    </a>
+
+                    <!-- Item 2 -->
+                    <a href="#"
+                        class="group bg-surface-container-low hover:bg-surface-container-lowest border border-outline-variant/20 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all p-8 rounded-2xl flex flex-col gap-6">
+                        <div
+                            class="text-5xl group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 origin-bottom-left">
+                            🚌</div>
+                        <div class="space-y-2">
+                            <h3 class="text-xl font-bold text-on-surface group-hover:text-primary transition-colors">Bus
+                                side panel</h3>
+                            <div class="text-sm font-medium text-on-surface-variant">From <span
+                                    class="text-lg font-black text-on-surface">₹50,000</span>/month</div>
+                        </div>
+                    </a>
+
+                    <!-- Item 3 -->
+                    <a href="#"
+                        class="group bg-surface-container-low hover:bg-surface-container-lowest border border-outline-variant/20 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all p-8 rounded-2xl flex flex-col gap-6">
+                        <div
+                            class="text-5xl group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 origin-bottom-left">
+                            🚍</div>
+                        <div class="space-y-2">
+                            <h3 class="text-xl font-bold text-on-surface group-hover:text-primary transition-colors">Bus
+                                back panel</h3>
+                            <div class="text-sm font-medium text-on-surface-variant">From <span
+                                    class="text-lg font-black text-on-surface">₹30,000</span>/month</div>
+                        </div>
+                    </a>
+
+                    <!-- Item 4 -->
+                    <a href="#"
+                        class="group bg-surface-container-low hover:bg-surface-container-lowest border border-outline-variant/20 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all p-8 rounded-2xl flex flex-col gap-6">
+                        <div
+                            class="text-5xl group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 origin-bottom-left text-primary">
+                            ✦</div>
+                        <div class="space-y-2">
+                            <h3 class="text-xl font-bold text-on-surface group-hover:text-primary transition-colors">
+                                Full bus wrap</h3>
+                            <div class="text-sm font-medium text-on-surface-variant">From <span
+                                    class="text-lg font-black text-on-surface">₹1,50,000</span>/month</div>
+                        </div>
+                    </a>
+
+                    <!-- Item 5 -->
+                    <a href="#"
+                        class="group bg-surface-container-low hover:bg-surface-container-lowest border border-outline-variant/20 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all p-8 rounded-2xl flex flex-col gap-6">
+                        <div
+                            class="text-5xl group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 origin-bottom-left">
+                            🚕</div>
+                        <div class="space-y-2">
+                            <h3 class="text-xl font-bold text-on-surface group-hover:text-primary transition-colors">Cab
+                                branding</h3>
+                            <div class="text-sm font-medium text-on-surface-variant">From <span
+                                    class="text-lg font-black text-on-surface">₹10,000</span>/month</div>
+                        </div>
+                    </a>
+
+                    <!-- Item 6 -->
+                    <a href="#"
+                        class="group kinetic-gradient text-on-primary border border-primary/20 hover:shadow-xl hover:shadow-primary/20 transition-all p-8 rounded-2xl flex flex-col gap-6 text-center justify-center items-center">
+                        <div
+                            class="text-5xl group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 origin-center text-white/90">
+                            ◈</div>
+                        <div class="space-y-2">
+                            <h3 class="text-2xl font-bold text-on-primary">PR & brand name</h3>
+                            <div class="text-sm font-medium text-on-primary/80 uppercase tracking-widest mt-2"><span
+                                    class="px-4 py-2 border border-white/40 rounded-full inline-block mt-2">Custom
+                                    plan</span></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+        <!-- Testimonial (Fortune 500) -->
+        <!-- <section class="py-24 px-6 relative">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid lg:grid-cols-2 gap-16 items-center">
+                    <div class="relative">
+                        <div class="aspect-square bg-surface-container-high rounded-xl overflow-hidden shadow-2xl">
+                            <img alt="Executive Director"
+                                class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                                data-alt="close-up of professional middle-aged man in expensive dark suit with subtle pinstripes in a luxury corporate setting with soft natural light"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDH2u-xf2mdzqA_zVCR1kieSzV_f6Zwh8vRfgzGpZ83KvAZGNcXvg9yy0rAvUL-pTi-tP2xVb0kiiq5iFao2z_JSAeizKV1eMzEkOJ7B94nH8Z4UA77pAPAoNFkjXGqQryGm-PHxAFhPBssZ3fvLq1jh1CvlpsVpdvM4lJ5fvJMUVVwUQHROX-xpCQ6xrPWLDanYie7q5uMfdBdmtmM_HJw6EgKfKtcpHy8awTM5ZX4x8rKV78BSSENYSoElzJIZmNVZCYvvj_kX5tl" />
+                        </div>
+                        <div
+                            class="absolute -bottom-6 -right-6 bg-primary p-8 rounded-xl shadow-xl max-w-xs kinetic-gradient">
+                            <span class="material-symbols-outlined text-on-primary text-4xl mb-4"
+                                data-icon="format_quote" style="font-variation-settings: 'FILL' 1;">format_quote</span>
+                            <p class="text-on-primary font-bold text-lg leading-tight">"Hamara Brand transformed our
+                                rural penetration strategy within one quarter."</p>
+                        </div>
+                    </div>
+                    <div class="space-y-8">
+                        <span class="text-secondary font-bold tracking-widest uppercase text-xs">Customer Success
+                            Story</span>
+                        <h2 class="text-4xl font-black text-on-surface tracking-tighter leading-tight">
+                            "The visibility into our campaign health is unparalleled. It's the first time we've had
+                            absolute data clarity in transit media."
+                        </h2>
+                        <div class="space-y-1">
+                            <div class="text-xl font-bold text-on-surface">Aravind Subramanian</div>
+                            <div class="text-on-surface-variant">Marketing Director, Global Consumer Goods (Fortune 500)
+                            </div>
+                        </div>
+                        <div class="flex gap-12 pt-4">
+                            <div>
+                                <div class="text-3xl font-black text-primary">22%</div>
+                                <div class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Recall
+                                    Lift</div>
+                            </div>
+                            <div>
+                                <div class="text-3xl font-black text-primary">4.2M</div>
+                                <div class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                                    Impression Gain</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section> -->
+        <!-- Final CTA -->
+        <!-- <section class="py-24 max-w-7xl mx-auto px-6 mb-24">
+            <div
+                class="kinetic-gradient rounded-2xl p-12 lg:p-20 text-center space-y-8 shadow-2xl shadow-primary/40 relative overflow-hidden">
+                <div class="absolute inset-0 bg-black/5 opacity-50 pointer-events-none"></div>
+                <h2
+                    class="text-4xl lg:text-6xl font-black text-on-primary tracking-tighter max-w-3xl mx-auto leading-none relative z-10">
+                    Ready to Own the Streets of India?
+                </h2>
+                <p class="text-on-primary/80 max-w-xl mx-auto relative z-10 font-medium">
+                    Download our 2024 Inventory Catalog and get a free audit of your current transit media strategy.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 relative z-10">
+                    <button
+                        class="bg-surface text-primary font-bold px-10 py-5 rounded-md active:scale-95 transform transition-all shadow-xl">
+                        Request Inventory Catalog
+                    </button>
+                    <button
+                        class="bg-on-primary/10 backdrop-blur-sm text-on-primary border border-on-primary/20 font-bold px-10 py-5 rounded-md hover:bg-on-primary/20 active:scale-95 transform transition-all">
+                        Talk to an Expert
+                    </button>
+                </div>
+            </div>
+        </section> -->
+
+        <!-- Contact Section -->
+        <section class="py-24 bg-surface-container-low border-t border-outline-variant/20 relative overflow-hidden">
+            <div
+                class="absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -ml-20 -mt-20 pointer-events-none">
+            </div>
+            <div class="max-w-7xl mx-auto px-6 relative z-10">
+                <div class="grid lg:grid-cols-12 gap-16 lg:items-center">
+                    <div class="lg:col-span-4 space-y-6 md:pr-8">
+                        <div class="space-y-4">
+                            <span class="text-primary font-bold tracking-widest uppercase text-xs">Reach Out</span>
+                            <h2 class="text-4xl md:text-5xl font-black text-on-surface tracking-tighter leading-tight">
+                                Let's get in touch</h2>
+                        </div>
+                        <p class="text-lg text-on-surface-variant leading-relaxed">You can contact us via email, phone,
+                            or social media. Looking forward to hearing from you!</p>
+
+                        <div class="flex gap-4 pt-4">
+                            <a href="#"
+                                class="w-12 h-12 rounded-full border border-outline-variant/50 hover:border-primary hover:bg-primary/5 text-on-surface-variant hover:text-primary flex items-center justify-center transition-all group">
+                                <span
+                                    class="material-symbols-outlined text-lg group-hover:scale-110 transition-transform"
+                                    data-icon="share">share</span>
+                            </a>
+                            <a href="#"
+                                class="w-12 h-12 rounded-full border border-outline-variant/50 hover:border-primary hover:bg-primary/5 text-on-surface-variant hover:text-primary flex items-center justify-center transition-all group">
+                                <span
+                                    class="material-symbols-outlined text-lg group-hover:scale-110 transition-transform"
+                                    data-icon="language">language</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-8 grid sm:grid-cols-2 gap-6 lg:gap-8">
+                        <!-- Office 1 -->
+                        <div
+                            class="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all flex flex-col gap-5">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined" data-icon="corporate_fare">corporate_fare</span>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-black text-on-surface mb-2">Register Office</h4>
+                                <p class="text-sm text-on-surface-variant leading-relaxed font-medium">601 Royal Town
+                                    Raghunath Vihar<br />Sirsi Road Jaipur</p>
+                            </div>
+                        </div>
+                        <!-- Office 2 -->
+                        <div
+                            class="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 hover:shadow-xl hover:shadow-secondary/5 hover:border-secondary/20 transition-all flex flex-col gap-5">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined" data-icon="location_city">location_city</span>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-black text-on-surface mb-2">Corporate Office</h4>
+                                <p class="text-sm text-on-surface-variant leading-relaxed font-medium">105 B Amish Park
+                                    Mira Gaon<br />Mira Road Thane Maharashtra</p>
+                            </div>
+                        </div>
+                        <!-- Email -->
+                        <div
+                            class="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 hover:shadow-xl hover:shadow-tertiary/5 hover:border-tertiary/20 transition-all flex flex-col gap-5">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined" data-icon="mail">mail</span>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-black text-on-surface mb-2">Email Us</h4>
+                                <a href="mailto:info@myonventure.com"
+                                    class="text-sm text-on-surface-variant hover:text-primary transition-colors font-medium">info@myonventure.com</a>
+                            </div>
+                        </div>
+                        <!-- Phone -->
+                        <div
+                            class="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all flex flex-col gap-5">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined" data-icon="call">call</span>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-black text-on-surface mb-2">Call Us</h4>
+                                <a href="tel:+919571115669"
+                                    class="text-sm text-on-surface-variant hover:text-primary transition-colors font-medium">+91-9571115669</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Footer -->
+    <footer
+        class="w-full border-t border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 font-['Inter'] text-sm leading-relaxed">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 px-8 py-12 max-w-7xl mx-auto">
+            <div class="space-y-4 md:col-span-6 lg:col-span-6 pr-0 lg:pr-12">
+                <div class="flex items-center gap-2">
+                    <img src="hbl.png" alt="HB Logo" class="h-10 w-auto object-contain" />
+                    <span class="font-bold text-slate-900 dark:text-slate-100 text-2xl tracking-tighter">Hamara
+                        Brand</span>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400">The premier marketplace for transit media assets,
+                    connecting global brands to the Indian landscape with data-driven precision.</p>
+            </div>
+            <div class="md:col-span-3 lg:col-span-3 pt-2">
+                <h5 class="font-bold text-slate-900 dark:text-slate-100 mb-6">Our Main Platform</h5>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="https://myonventure.com" target="_blank"
+                            class="flex items-center gap-1 text-slate-900 font-bold dark:text-slate-100 hover:text-green-600 dark:hover:text-green-400 transition-all">
+                            myonventure.com <span class="material-symbols-outlined text-[16px]"
+                                data-icon="open_in_new">open_in_new</span>
+                        </a>
+                    </li>
+                    <li class="text-slate-500 dark:text-slate-400 text-sm">Register as Media Buyers and Sellers.</li>
+                </ul>
+            </div>
+            <div class="md:col-span-3 lg:col-span-3 pt-2">
+                <h5 class="font-bold text-slate-900 dark:text-slate-100 mb-6">Contact</h5>
+                <ul class="space-y-3">
+                    <li class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-xs" data-icon="mail">mail</span>
+                        info@myonventure.com
+                    </li>
+                    <li class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-xs" data-icon="call">call</span>
+                        +91 9571115669
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div
+            class="max-w-7xl mx-auto px-8 py-6 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-slate-500 dark:text-slate-400 text-xs">© Hamara Brand
+            </p>
+            <div class="flex gap-6">
+                <span
+                    class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-green-600 transition-colors"
+                    data-icon="share">share</span>
+                <span
+                    class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-green-600 transition-colors"
+                    data-icon="language">language</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lead Gen Modal -->
+    <div id="lead-gen-modal" class="fixed inset-0 z-[100] hidden bg-black/50 backdrop-blur-sm transition-opacity overflow-y-auto">
+        <div class="flex min-h-[100dvh] items-center justify-center p-4">
+            <div class="bg-surface-container-lowest p-6 sm:p-8 rounded-2xl shadow-2xl border border-outline-variant/10 relative w-full border-t-[8px] border-t-primary max-w-lg">
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface">
+                <span class="material-symbols-outlined" data-icon="close">close</span>
+            </button>
+            <h3 class="text-2xl font-bold mb-6 tracking-tight text-on-surface">Request Custom Proposal</h3>
+            <form id="lead-gen-modal-form" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Your name</label>
+                    <input name="name" class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm" placeholder="e.g. Rahul Sharma" type="text" required />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Company name</label>
+                    <input name="company" class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm" placeholder="e.g. ABC Pvt. Ltd." type="text" required />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Phone number</label>
+                    <input name="phone" class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm" placeholder="e.g. +91 98765 43210" type="tel" required />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Service needed</label>
+                    <input name="service" id="modal-service-needed" class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm" placeholder="e.g. Bus back panel" type="text" required />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Target city</label>
+                    <input name="city" id="modal-target-city" class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm" placeholder="e.g. Mumbai" type="text" required />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Monthly budget</label>
+                    <select name="budget" class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm appearance-none" required>
+                        <option value="" disabled selected>Select Budget Range</option>
+                        <option value="₹50,000 – ₹2,00,000">₹50,000 – ₹2,00,000</option>
+                        <option value="₹2,00,000 – ₹5,00,000">₹2,00,000 – ₹5,00,000</option>
+                        <option value="₹5,00,000+">₹5,00,000+</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full kinetic-gradient text-on-primary font-bold py-4 rounded-md shadow-lg shadow-primary/30 mt-4 active:scale-95 transform transition-all">
+                    Submit Request
+                </button>
+            </form>
+        </div>
+        </div>
+    </div>
+
+    <!-- Logic for Modal -->
+    <script>
+        const getStartedBtn = document.getElementById('get-started-btn');
+        const deployCampaignForm = document.getElementById('deploy-campaign-form');
+        const modal = document.getElementById('lead-gen-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        
+        const targetCitiesInput = document.getElementById('target-cities-input');
+        const mediaTypeSelect = document.getElementById('media-type-select');
+        
+        const modalServiceNeeded = document.getElementById('modal-service-needed');
+        const modalTargetCity = document.getElementById('modal-target-city');
+
+        function openModal(service = '', city = '') {
+            modalServiceNeeded.value = service !== 'Select Media Asset' ? service : '';
+            modalTargetCity.value = city;
+            modal.classList.remove('hidden');
+            modal.classList.add('block');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('block');
+        }
+
+        getStartedBtn.addEventListener('click', () => {
+            openModal();
+        });
+
+        deployCampaignForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const city = targetCitiesInput.value.trim();
+            const service = mediaTypeSelect.value.trim();
+            openModal(service, city);
+        });
+
+        closeModalBtn.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+        
+        document.getElementById('lead-gen-modal-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerText;
+            
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwAmu16ifunplSMyFl2JDRoBWoT3z7-C792refTZAfFHU-9adeaPx7eMBhwotWY7hRWg/exec';
+
+            submitBtn.innerText = 'Submitting...';
+            submitBtn.disabled = true;
+
+            // Collect the form data
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            formData.forEach((value, key) => params.append(key, value));
+
+            // Create a hidden iframe to receive the form response (avoids CORS)
+            const iframeName = 'hidden_iframe_' + Date.now();
+            const iframe = document.createElement('iframe');
+            iframe.name = iframeName;
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+
+            // Create a temporary hidden form that targets the iframe
+            const tempForm = document.createElement('form');
+            tempForm.method = 'POST';
+            tempForm.action = GOOGLE_SCRIPT_URL;
+            tempForm.target = iframeName;
+            tempForm.style.display = 'none';
+
+            // Add all form fields as hidden inputs
+            params.forEach((value, key) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                tempForm.appendChild(input);
+            });
+
+            document.body.appendChild(tempForm);
+            tempForm.submit();
+
+            // Wait a moment for submission, then clean up and show success
+            setTimeout(() => {
+                document.body.removeChild(tempForm);
+                document.body.removeChild(iframe);
+                submitBtn.innerText = originalBtnText;
+                submitBtn.disabled = false;
+                alert('Proposal request submitted successfully!');
+                closeModal();
+                form.reset();
+            }, 2000);
+        });
+    </script>
+</body>
+
+</html>
