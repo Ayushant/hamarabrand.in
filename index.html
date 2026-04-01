@@ -876,7 +876,7 @@
             const form = e.target;
             const submitBtn = form.querySelector('button[type="submit"]');
 
-            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwAmu16ifunplSMyFl2JDRoBWoT3z7-C792refTZAfFHU-9adeaPx7eMBhwotWY7hRWg/exec';
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2SuumH1jsCbaJzBk8Q543hBtLmQWgVxj8OMahdMlCtQLuGHJW4kvX_o6TXVD6oHFc/exec';
 
             submitBtn.innerText = 'Submitting...';
             submitBtn.disabled = true;
@@ -885,21 +885,33 @@
             const formData = new FormData(form);
             const params = new URLSearchParams();
             
-            formData.forEach((value, key) => {
-                params.append(key, value);
+            const formValues = {
+                name: form.querySelector('[name="name"]').value,
+                company: form.querySelector('[name="company"]').value,
+                phone: form.querySelector('[name="phone"]').value,
+                service: form.querySelector('[name="service"]').value,
+                city: form.querySelector('[name="city"]').value,
+                budget: form.querySelector('[name="budget"]').value
+            };
+            
+            Object.keys(formValues).forEach(key => {
+                params.append(key, formValues[key]);
             });
 
-            // Send data to Google Apps Script with proper headers
+            console.log('Sending proposal data:', formValues);
+            console.log('Google Apps Script URL:', GOOGLE_SCRIPT_URL);
+
+            // Send data to Google Apps Script
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
+                mode: 'no-cors', // Critical for Google Apps Script to work without CORS errors
                 body: params,
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                // Success response
+            .then(response => {
+                // Since we use no-cors, the response is opaque (status 0) but the request was sent.
                 submitBtn.innerText = 'Submitted';
                 submitBtn.disabled = true;
                 showToast('Proposal submitted successfully!');
@@ -913,8 +925,7 @@
                 }, 1500);
             })
             .catch((error) => {
-                console.error('Submission error:', error);
-                // Still show submitted even on error - the data likely went through
+                console.error('Fetch error:', error);
                 submitBtn.innerText = 'Submitted';
                 submitBtn.disabled = true;
                 showToast('Proposal submitted!');

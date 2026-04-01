@@ -19,6 +19,7 @@ const SHEET_NAME = 'Sheet1'; // Change this if your tab is named differently
 
 function doPost(e) {
   try {
+    // Get the active spreadsheet the script is attached to
     const doc = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = doc.getSheetByName(SHEET_NAME) || doc.getSheets()[0];
     
