@@ -875,7 +875,6 @@
 
             const form = e.target;
             const submitBtn = form.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerText;
 
             const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwAmu16ifunplSMyFl2JDRoBWoT3z7-C792refTZAfFHU-9adeaPx7eMBhwotWY7hRWg/exec';
 
@@ -884,45 +883,32 @@
 
             // Collect the form data
             const formData = new FormData(form);
-            const params = new URLSearchParams();
-            formData.forEach((value, key) => params.append(key, value));
 
-            // Create a hidden iframe to receive the form response (avoids CORS)
-            const iframeName = 'hidden_iframe_' + Date.now();
-            const iframe = document.createElement('iframe');
-            iframe.name = iframeName;
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-
-            // Create a temporary hidden form that targets the iframe
-            const tempForm = document.createElement('form');
-            tempForm.method = 'POST';
-            tempForm.action = GOOGLE_SCRIPT_URL;
-            tempForm.target = iframeName;
-            tempForm.style.display = 'none';
-
-            // Add all form fields as hidden inputs
-            params.forEach((value, key) => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = value;
-                tempForm.appendChild(input);
+            // Send using fetch with no-cors mode
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            }).then(() => {
+                // Regardless of response, update the button
+                submitBtn.innerText = 'Submitted';
+                submitBtn.disabled = true;
+                
+                // Close modal and reset form after brief delay
+                setTimeout(() => {
+                    closeModal();
+                    form.reset();
+                }, 500);
+            }).catch((error) => {
+                // Still show submitted even on error
+                submitBtn.innerText = 'Submitted';
+                submitBtn.disabled = true;
+                
+                setTimeout(() => {
+                    closeModal();
+                    form.reset();
+                }, 500);
             });
-
-            document.body.appendChild(tempForm);
-            tempForm.submit();
-
-            // Wait a moment for submission, then clean up and show success
-            setTimeout(() => {
-                document.body.removeChild(tempForm);
-                document.body.removeChild(iframe);
-                submitBtn.innerText = originalBtnText;
-                submitBtn.disabled = false;
-                alert('Proposal request submitted successfully!');
-                closeModal();
-                form.reset();
-            }, 2000);
         });
 
         // Share button
