@@ -943,7 +943,7 @@
                 // Since we use no-cors, the response is opaque (status 0) but the request was sent.
                 submitBtn.innerText = 'Thank You!';
                 submitBtn.disabled = true;
-                showToast('Thank you! We will get back to you soon.');
+                showToast('Thank you! Your request has been received.');
                 
                 // Close modal and reset form after brief delay
                 setTimeout(() => {
@@ -957,7 +957,7 @@
                 console.error('Fetch error:', error);
                 submitBtn.innerText = 'Thank You!';
                 submitBtn.disabled = true;
-                showToast('Thank you! We will get back to you soon.');
+                showToast('Thank you! Your request has been received.');
                 
                 setTimeout(() => {
                     closeModal();
