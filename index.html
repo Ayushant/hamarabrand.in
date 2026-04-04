@@ -250,14 +250,14 @@
                                 <div class="space-y-1.5">
                                     <label
                                         class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Units</label>
-                                    <input
+                                    <input id="units-input"
                                         class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
                                         placeholder="100" type="number" />
                                 </div>
                                 <div class="space-y-1.5">
                                     <label
                                         class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Duration</label>
-                                    <input
+                                    <input id="duration-input"
                                         class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
                                         placeholder="3 Months" type="text" />
                                 </div>
@@ -834,6 +834,12 @@
                             <option value="₹5,00,000+">₹5,00,000+</option>
                         </select>
                     </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Duration</label>
+                        <input name="duration" id="modal-duration"
+                            class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
+                            placeholder="e.g. 3 Months" type="text" />
+                    </div>
                     <button type="submit"
                         class="w-full kinetic-gradient text-on-primary font-bold py-4 rounded-md shadow-lg shadow-primary/30 mt-4 active:scale-95 transform transition-all">
                         Submit Request
@@ -852,13 +858,17 @@
 
         const targetCitiesInput = document.getElementById('target-cities-input');
         const mediaTypeSelect = document.getElementById('media-type-select');
+        const unitsInput = document.getElementById('units-input');
+        const durationInput = document.getElementById('duration-input');
 
         const modalServiceNeeded = document.getElementById('modal-service-needed');
         const modalTargetCity = document.getElementById('modal-target-city');
+        const modalDuration = document.getElementById('modal-duration');
 
-        function openModal(service = '', city = '') {
+        function openModal(service = '', city = '', duration = '') {
             modalServiceNeeded.value = service !== 'Select Media Asset' ? service : '';
             modalTargetCity.value = city;
+            modalDuration.value = duration;
             modal.classList.remove('hidden');
             modal.classList.add('block');
         }
@@ -876,7 +886,8 @@
             e.preventDefault();
             const city = targetCitiesInput.value.trim();
             const service = mediaTypeSelect.value.trim();
-            openModal(service, city);
+            const duration = durationInput.value.trim();
+            openModal(service, city, duration);
         });
 
         closeModalBtn.addEventListener('click', closeModal);
@@ -908,7 +919,8 @@
                 phone: form.querySelector('[name="phone"]').value,
                 service: form.querySelector('[name="service"]').value,
                 city: form.querySelector('[name="city"]').value,
-                budget: form.querySelector('[name="budget"]').value
+                budget: form.querySelector('[name="budget"]').value,
+                duration: form.querySelector('[name="duration"]').value
             };
             
             Object.keys(formValues).forEach(key => {

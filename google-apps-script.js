@@ -4,7 +4,7 @@
  * 1. Open your Google Sheet: https://docs.google.com/spreadsheets/d/1cKaHckuLttZsbd2jPRN8HckSO1RoINjGdrj_XFY6Vnk/edit
  * 2. Click on "Extensions" in the top menu, then select "Apps Script"
  * 3. Delete any code in the editor and paste ALL the code below
- * 4. Add headers to the first row of your Google Sheet exactly matching the data (e.g., A1: Timestamp, B1: Name, C1: Company, D1: Phone, E1: Service, F1: City, G1: Budget)
+ * 4. Add headers to the first row of your Google Sheet exactly matching the data (e.g., A1: Timestamp, B1: Name, C1: Company, D1: Phone, E1: Service, F1: City, G1: Budget, H1: Duration)
  * 5. Click the "Save" icon (or File -> Save)
  * 6. Click "Deploy" > "New deployment"
  * 7. Click the gear icon next to "Select type" and choose "Web app"
@@ -31,7 +31,8 @@ function doPost(e) {
       e.parameter.phone || '',
       e.parameter.service || '',
       e.parameter.city || '',
-      e.parameter.budget || ''
+      e.parameter.budget || '',
+      e.parameter.duration || ''
     ];
     
     sheet.appendRow(rowData);
