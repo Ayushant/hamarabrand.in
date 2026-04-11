@@ -1,0 +1,10 @@
+# Hamara Brand
+
+Site: https://hamarabrand.in/
+Title: Hamara Brand | Enterprise Transit Media Marketplace
+Description: India's No.1 Enterprise Transit Media Marketplace. Book advertising on buses, autos, and cabs across India.
+
+URLs:
+- https://hamarabrand.in/
+- https://hamarabrand.in/sitemap.xml
+- https://hamarabrand.in/robots.txt

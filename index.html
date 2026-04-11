@@ -41,53 +41,23 @@
             theme: {
                 extend: {
                     colors: {
-                        "error": "#ba1a1a",
-                        "background": "#f9f9fb",
-                        "on-secondary-fixed": "#3e001f",
-                        "inverse-surface": "#2f3132",
-                        "secondary": "#b40065",
-                        "surface-tint": "#006e2a",
-                        "on-surface-variant": "#3c4a3c",
-                        "surface-container-highest": "#e2e2e4",
-                        "surface-bright": "#f9f9fb",
-                        "on-tertiary": "#ffffff",
-                        "on-primary-container": "#004c1b",
+                        "primary": "#0B6E4F",
+                        "secondary": "#D4AF37",
+                        "cta": "#FF6F00",
+                        "background": "#FFFFFF",
+                        "surface": "#FFFFFF",
+                        "surface-container-low": "#f8f9fa",
+                        "surface-container": "#f1f3f5",
+                        "surface-container-highest": "#e9ecef",
                         "surface-container-lowest": "#ffffff",
-                        "surface": "#f9f9fb",
-                        "surface-container-high": "#e8e8ea",
-                        "on-secondary-fixed-variant": "#8d004e",
-                        "tertiary": "#4c56af",
-                        "on-secondary": "#ffffff",
+                        "on-surface": "#111111",
+                        "on-surface-variant": "#555555",
                         "on-primary": "#ffffff",
-                        "tertiary-fixed-dim": "#bdc2ff",
-                        "on-error": "#ffffff",
-                        "secondary-fixed": "#ffd9e3",
-                        "primary-fixed-dim": "#3ce36a",
-                        "secondary-fixed-dim": "#ffb0ca",
-                        "on-tertiary-fixed-variant": "#343d96",
-                        "error-container": "#ffdad6",
-                        "on-secondary-container": "#fffbff",
-                        "on-primary-fixed-variant": "#00531e",
-                        "on-primary-fixed": "#002108",
-                        "surface-dim": "#d9dadc",
-                        "tertiary-container": "#9ea6ff",
-                        "tertiary-fixed": "#e0e0ff",
-                        "primary-container": "#00c853",
-                        "inverse-primary": "#3ce36a",
-                        "inverse-on-surface": "#f0f0f2",
-                        "surface-variant": "#e2e2e4",
-                        "on-tertiary-fixed": "#000767",
-                        "on-surface": "#1a1c1d",
-                        "on-tertiary-container": "#2d368f",
-                        "surface-container-low": "#f3f3f5",
-                        "on-background": "#1a1c1d",
-                        "on-error-container": "#93000a",
-                        "outline": "#6c7b6a",
-                        "primary-fixed": "#69ff87",
-                        "secondary-container": "#e10080",
-                        "outline-variant": "#bbcbb8",
-                        "primary": "#006e2a",
-                        "surface-container": "#eeeef0"
+                        "primary-container": "#0B6E4F",
+                        "on-primary-container": "#ffffff",
+                        "secondary-fixed": "#D4AF37",
+                        "on-secondary-fixed-variant": "#111111",
+                        "outline-variant": "#e9ecef"
                     },
                     fontFamily: {
                         "headline": ["Inter"],
@@ -115,7 +85,11 @@
         }
 
         .kinetic-gradient {
-            background: linear-gradient(135deg, #006e2a 0%, #00c853 100%);
+            background: linear-gradient(135deg, #0B6E4F 0%, #D4AF37 100%);
+        }
+        
+        .cta-btn {
+            background-color: #FF6F00;
         }
 
         @keyframes marquee {
@@ -155,8 +129,8 @@
         <div class="flex items-center justify-between px-6 py-0 max-w-7xl mx-auto">
             <div class="flex items-center gap-1">
                 <img src="hbl.png" alt="HB Logo" class="w-auto object-contain" style="height:4.5rem" />
-                <span class="text-base md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Hamara
-                    Brand</span>
+                <!-- <span class="text-base md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Hamara
+                    Brand</span> -->
             </div>
 
             <div class="flex items-center gap-2 md:gap-4">
@@ -170,7 +144,7 @@
                     <span class="material-symbols-outlined text-[14px] absolute right-2 text-on-surface-variant pointer-events-none" data-icon="expand_more">expand_more</span>
                 </div> -->
                 <button id="get-started-btn" type="button"
-                    class="bg-primary text-on-primary px-6 py-2.5 rounded-md font-bold text-sm kinetic-gradient active:scale-95 transform transition-all shadow-lg shadow-primary/20">
+                    class="bg-cta text-white px-6 py-2.5 rounded-md font-bold text-sm active:scale-95 transform transition-all shadow-lg shadow-cta/20 hover:opacity-90">
                     Get Started
                 </button>
             </div>
@@ -192,7 +166,7 @@
                     </div>
                     <h1
                         class="text-5xl lg:text-7xl font-black text-on-surface tracking-tighter leading-[0.95] lg:max-w-2xl">
-                        Put Your Brand on 10,000+ <span class="text-primary italic">Buses, Autos & Cabs</span>
+                        Put Your Brand on <span class="text-secondary drop-shadow-sm">10,000+</span> <span class="text-primary italic">Buses, Autos & Cabs</span>
                     </h1>
                     <!-- <p class="text-lg text-on-surface-variant max-w-xl leading-relaxed">
                         across India Verified Rates, Pan-India Reach
@@ -263,7 +237,7 @@
                                 </div>
                             </div>
                             <button
-                                class="w-full kinetic-gradient text-on-primary font-bold py-4 rounded-md shadow-lg shadow-primary/30 mt-4 active:scale-95 transform transition-all">
+                                class="w-full bg-cta text-white font-bold py-4 rounded-md shadow-lg shadow-cta/30 mt-4 active:scale-95 transform transition-all hover:opacity-90">
                                 Generate Custom Proposal
                             </button>
                         </form>
@@ -452,7 +426,7 @@
                 <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
                     <div class="space-y-4">
                         <span class="text-primary font-bold tracking-widest uppercase text-xs">Our services click to
-                            enquire</span>
+                            enquire*</span>
                         <h2 class="text-4xl md:text-5xl font-black text-on-surface tracking-tighter leading-tight">
                             Inventory Marketplace <br /> Premium Transit Assets</h2>
                     </div>
@@ -727,8 +701,8 @@
             <div class="space-y-4 md:col-span-6 lg:col-span-6 pr-0 lg:pr-12">
                 <div class="flex items-center gap-2">
                     <img src="hbl.png" alt="HB Logo" class="h-10 w-auto object-contain" />
-                    <span class="font-bold text-slate-900 dark:text-slate-100 text-2xl tracking-tighter">Hamara
-                        Brand</span>
+                    <!-- <span class="font-bold text-slate-900 dark:text-slate-100 text-2xl tracking-tighter">Hamara
+                        Brand</span> -->
                 </div>
                 <p class="text-slate-500 dark:text-slate-400">The premier marketplace for transit media assets,
                     connecting global brands to the Indian landscape with data-driven precision.</p>
