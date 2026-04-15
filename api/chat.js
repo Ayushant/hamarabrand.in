@@ -164,6 +164,11 @@ When a user's question is about any of the following topics, append the exact to
 
 Only include [PLATFORM_CARD] once, only when relevant, and only at the very end of your response. Do not explain the token — it is invisible to the user.`;
 
+// Simple in-memory rate limiter (works per serverless instance)
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 10; // Max 10 messages per minute per IP
+
 export default async function handler(req, res) {
   // Handle CORS preflight
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -177,6 +182,26 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  // --- IP Rate Limiting ---
+  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress || "unknown_ip";
+  const now = Date.now();
+  
+  if (rateLimitMap.has(ip)) {
+      const userLimits = rateLimitMap.get(ip);
+      // If time window passed, reset
+      if (now - userLimits.startTime > RATE_LIMIT_WINDOW_MS) {
+          rateLimitMap.set(ip, { count: 1, startTime: now });
+      } else {
+          userLimits.count += 1;
+          if (userLimits.count > MAX_REQUESTS_PER_WINDOW) {
+              return res.status(429).json({ error: "Rate limit exceeded. Please wait a minute before sending more messages." });
+          }
+      }
+  } else {
+      rateLimitMap.set(ip, { count: 1, startTime: now });
+  }
+  // ------------------------
 
 // Vercel Serverless Function — Hamara Brand AI Chatbot Proxy
 // API key is read from GROQ_API_KEY environment variable set in Vercel dashboard.

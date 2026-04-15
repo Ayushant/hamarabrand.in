@@ -1534,6 +1534,10 @@
         let isLoading = false;
         let conversationHistory = []; // [{role:'user'|'bot', content:'...'}]
         let pingRemoved = false;
+        
+        // Rate limiting
+        let sessionMessageCount = 0;
+        const MAX_SESSION_MESSAGES = 15;
 
         // ── DOM refs ────────────────────────────────────────────────
         const fab         = document.getElementById('hb-chat-fab');
@@ -1706,6 +1710,15 @@
             const msg = text || inputEl.value.trim();
             if (!msg || isLoading) return;
 
+            if (sessionMessageCount >= MAX_SESSION_MESSAGES) {
+                inputEl.value = '';
+                addBotMessage('You have reached the maximum number of messages for this session. Please call us at **+91-9571115669** or email **info@myonventure.com** to continue the conversation.');
+                setLoading(true);
+                inputEl.placeholder = 'Chat limit reached.';
+                return;
+            }
+
+            sessionMessageCount++;
             inputEl.value = '';
             suggestionsEl.style.display = 'none';
             addUserMessage(msg);
