@@ -1731,7 +1731,8 @@
 
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({}));
-                    addBotMessage(err.error || 'Sorry, something went wrong. Please try again or call us at **+91-9571115669**.');
+                    const detail = err.message ? `\n\nDetail: ${err.message}` : '';
+                    addBotMessage((err.error || 'Unable to connect to AI') + detail);
                 } else {
                     const data = await res.json();
                     addBotMessage(data.reply || 'I couldn\'t get a response. Please contact us at **info@myonventure.com**.');

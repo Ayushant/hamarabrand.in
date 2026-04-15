@@ -1,6 +1,5 @@
 // Vercel Serverless Function — Hamara Brand AI Chatbot Proxy
 // API key is read from GEMINI_API_KEY environment variable set in Vercel dashboard.
-// Never hardcode the API key here.
 
 const SYSTEM_PROMPT = `You are the official AI Assistant for Hamara Brand — a senior, knowledgeable, and professional representative who helps brands, agencies, and media buyers get the most out of the Hamara Brand platform.
 
@@ -179,22 +178,27 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Sanitize API Key (remove potential quotes/spaces)
+  const apiKey = (process.env.GEMINI_API_KEY || "").trim().replace(/^["']|["']$/g, '');
+  
   if (!apiKey) {
-    return res.status(500).json({ error: "API key not configured on server." });
+    return res.status(500).json({ error: "API key missing in Vercel. Please add GEMINI_API_KEY to environment variables." });
   }
 
   const { messages } = req.body;
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({ error: "Invalid messages payload." });
+    return res.status(400).json({ error: "No messages provided." });
   }
 
-  // Build Gemini-compatible conversation history
-  const geminiContents = messages.map((msg) => ({
-    role: msg.role === "user" ? "user" : "model",
-    parts: [{ text: msg.content }],
-  }));
+  // Ensure history starts with 'user' role (Gemini requirement)
+  let geminiContents = [];
+  messages.forEach((msg) => {
+      geminiContents.push({
+          role: msg.role === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.content }]
+      });
+  });
 
   try {
     const geminiRes = await fetch(
@@ -208,32 +212,30 @@ export default async function handler(req, res) {
           },
           contents: geminiContents,
           generationConfig: {
-            temperature: 0.65,
-            maxOutputTokens: 600,
-            topP: 0.85,
-          },
-          safetySettings: [
-            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-          ],
+            temperature: 0.7,
+            maxOutputTokens: 800,
+            topP: 0.9,
+          }
         }),
       }
     );
 
+    const data = await geminiRes.json();
+
     if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      console.error("Gemini API error:", errText);
-      return res.status(502).json({ error: "AI service error. Please try again." });
+        console.error("Gemini API Error Detail:", JSON.stringify(data));
+        // Pass more detail to frontend temporarily for debugging
+        return res.status(502).json({ 
+            error: "Gemini Service Refused", 
+            message: data.error?.message || "Check your API key status and quota." 
+        });
     }
 
-    const data = await geminiRes.json();
-    const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "I was unable to process your request. Please contact us at Support@hamarabrand.com or call +91-9571115669.";
-
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "I apologize, but I couldn't generate a response. Please contact support.";
     return res.status(200).json({ reply });
+
   } catch (err) {
-    console.error("Server error:", err);
-    return res.status(500).json({ error: "Internal server error." });
+    console.error("Serverless Function Error:", err);
+    return res.status(500).json({ error: "Internal Server Error", details: err.message });
   }
 }
