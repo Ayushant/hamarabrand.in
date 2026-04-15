@@ -1,0 +1,14 @@
+{
+  "name": "hamarabrand-in",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Hamara Brand Web & AI Chatbot",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}

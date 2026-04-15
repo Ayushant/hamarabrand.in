@@ -18,6 +18,12 @@
       "permanent": true
     }
   ],
+  "rewrites": [
+    {
+      "source": "/api/chat",
+      "destination": "/api/chat.js"
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
