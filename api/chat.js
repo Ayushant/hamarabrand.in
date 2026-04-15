@@ -178,11 +178,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+// Vercel Serverless Function — Hamara Brand AI Chatbot Proxy
+// API key is read from GROQ_API_KEY environment variable set in Vercel dashboard.
+
   // Sanitize API Key (remove potential quotes/spaces)
-  const apiKey = (process.env.GEMINI_API_KEY || "").trim().replace(/^["']|["']$/g, '');
+  const apiKey = (process.env.GROQ_API_KEY || "").trim().replace(/^["']|["']$/g, '');
   
   if (!apiKey) {
-    return res.status(500).json({ error: "API key missing in Vercel. Please add GEMINI_API_KEY to environment variables." });
+    return res.status(500).json({ error: "API key missing in Vercel. Please add GROQ_API_KEY to environment variables." });
   }
 
   const { messages } = req.body;
@@ -191,47 +194,49 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "No messages provided." });
   }
 
-  // Ensure history starts with 'user' role (Gemini requirement)
-  let geminiContents = [];
+  // Build Groq/OpenAI compatible conversation history
+  let groqMessages = [
+    { role: 'system', content: SYSTEM_PROMPT }
+  ];
+  
   messages.forEach((msg) => {
-      geminiContents.push({
-          role: msg.role === 'user' ? 'user' : 'model',
-          parts: [{ text: msg.content }]
+      groqMessages.push({
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.content
       });
   });
 
   try {
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    const groqRes = await fetch(
+      `https://api.groq.com/openai/v1/chat/completions`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json" 
+        },
         body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: SYSTEM_PROMPT }],
-          },
-          contents: geminiContents,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 800,
-            topP: 0.9,
-          }
+          model: "llama-3.3-70b-versatile",
+          messages: groqMessages,
+          temperature: 0.7,
+          max_tokens: 800,
+          top_p: 0.9,
         }),
       }
     );
 
-    const data = await geminiRes.json();
+    const data = await groqRes.json();
 
-    if (!geminiRes.ok) {
-        console.error("Gemini API Error Detail:", JSON.stringify(data));
+    if (!groqRes.ok) {
+        console.error("Groq API Error Detail:", JSON.stringify(data));
         // Pass more detail to frontend temporarily for debugging
         return res.status(502).json({ 
-            error: "Gemini Service Refused", 
+            error: "AI Service Refused", 
             message: data.error?.message || "Check your API key status and quota." 
         });
     }
 
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "I apologize, but I couldn't generate a response. Please contact support.";
+    const reply = data?.choices?.[0]?.message?.content || "I apologize, but I couldn't generate a response. Please contact support.";
     return res.status(200).json({ reply });
 
   } catch (err) {
