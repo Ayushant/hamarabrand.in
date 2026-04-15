@@ -1083,339 +1083,693 @@
             }
         }
 
-        /* CHATBOT STYLES COMMENTED OUT
-        .chatbot-widget {
+        /* ===== HAMARA BRAND AI CHATBOT STYLES ===== */
+        .hb-chat-widget {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 1000;
+            bottom: 28px;
+            right: 28px;
+            z-index: 9999;
             font-family: 'Inter', sans-serif;
         }
 
-        .chatbot-button {
-            width: 56px;
-            height: 56px;
+        /* Floating chat bubble button */
+        .hb-chat-fab {
+            width: 62px;
+            height: 62px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #006e2a 0%, #00c853 100%);
+            background: linear-gradient(135deg, #0B6E4F 0%, #D4AF37 100%);
             color: white;
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 110, 42, 0.3);
+            box-shadow: 0 6px 24px rgba(11,110,79,0.45);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            font-size: 24px;
+            transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease;
+            position: relative;
         }
-
-        .chatbot-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(0, 110, 42, 0.4);
+        .hb-chat-fab:hover {
+            transform: scale(1.12);
+            box-shadow: 0 10px 32px rgba(11,110,79,0.55);
         }
+        .hb-chat-fab svg { width: 28px; height: 28px; transition: all 0.3s ease; }
 
-        .chatbot-button.open {
-            display: none;
-        }
-
-        .chatbot-container {
+        /* Notification ping on FAB */
+        .hb-chat-ping {
             position: absolute;
-            bottom: 80px;
+            top: 4px; right: 4px;
+            width: 14px; height: 14px;
+            background: #FF6F00;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        .hb-chat-ping::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: #FF6F00;
+            opacity: 0.4;
+            animation: hb-ping 1.8s ease-in-out infinite;
+        }
+        @keyframes hb-ping {
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.6); opacity: 0; }
+        }
+
+        /* Chat window */
+        .hb-chat-window {
+            position: absolute;
+            bottom: 76px;
             right: 0;
             width: 380px;
-            max-height: 600px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-            display: none;
+            height: 560px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(11,110,79,0.12);
+            display: flex;
             flex-direction: column;
+            overflow: hidden;
             opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
+            transform: translateY(16px) scale(0.97);
+            pointer-events: none;
+            transition: opacity 0.28s ease, transform 0.28s cubic-bezier(.34,1.56,.64,1);
+            border: 1px solid rgba(11,110,79,0.12);
         }
-
-        .chatbot-container.active {
-            display: flex;
+        .hb-chat-window.hb-open {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
+            pointer-events: all;
         }
 
-        .chatbot-header {
-            background: linear-gradient(135deg, #006e2a 0%, #00c853 100%);
-            color: white;
-            padding: 16px;
-            border-radius: 12px 12px 0 0;
+        /* Chat header */
+        .hb-chat-header {
+            background: linear-gradient(135deg, #0B6E4F 0%, #158060 50%, #1a9070 100%);
+            padding: 16px 20px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
         }
-
-        .chatbot-header h3 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 600;
+        .hb-chat-avatar {
+            width: 44px; height: 44px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 0.5px;
+            border: 2px solid rgba(255,255,255,0.3);
+            flex-shrink: 0;
         }
-
-        .chatbot-close {
-            background: none;
+        .hb-chat-header-info { flex: 1; }
+        .hb-chat-header-name {
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+        .hb-chat-header-status {
+            color: rgba(255,255,255,0.8);
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 2px;
+        }
+        .hb-status-dot {
+            width: 7px; height: 7px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: hb-blink 2s ease-in-out infinite;
+        }
+        @keyframes hb-blink {
+            0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+        }
+        .hb-chat-close {
+            background: rgba(255,255,255,0.15);
             border: none;
             color: white;
             cursor: pointer;
-            font-size: 20px;
-            padding: 0;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 8px;
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+            flex-shrink: 0;
         }
+        .hb-chat-close:hover { background: rgba(255,255,255,0.28); }
 
-        .chatbot-messages {
+        /* Messages area */
+        .hb-chat-messages {
             flex: 1;
             overflow-y: auto;
             padding: 16px;
-            background: #fafafa;
-            height: 340px;
+            background: #f7f8fa;
             display: flex;
             flex-direction: column;
             gap: 12px;
+            scroll-behavior: smooth;
         }
+        .hb-chat-messages::-webkit-scrollbar { width: 4px; }
+        .hb-chat-messages::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
 
-        .chatbot-message {
+        /* Message bubbles */
+        .hb-msg {
             display: flex;
             gap: 8px;
-            animation: slideIn 0.3s ease;
+            animation: hb-msgIn 0.25s ease;
         }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes hb-msgIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-
-        .chatbot-message.user {
-            justify-content: flex-end;
-        }
-
-        .chatbot-message.bot {
-            justify-content: flex-start;
-        }
-
-        .message-content {
-            max-width: 280px;
-            padding: 10px 12px;
-            border-radius: 8px;
+        .hb-msg.hb-user { flex-direction: row-reverse; }
+        .hb-msg-avatar {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
             font-size: 14px;
-            line-height: 1.4;
+            flex-shrink: 0;
+            margin-top: 2px;
         }
-
-        .bot .message-content {
+        .hb-msg.hb-bot .hb-msg-avatar { background: #f0f4f8; color: #0B6E4F; border: 1.5px solid #e2e8f0; }
+        .hb-msg.hb-user .hb-msg-avatar { background: #0B6E4F; color: white; }
+        .hb-msg-bubble {
+            max-width: 270px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 13.5px;
+            line-height: 1.55;
+            word-break: break-word;
+        }
+        .hb-msg.hb-bot .hb-msg-bubble {
             background: white;
-            color: #1a1c1d;
-            border: 1px solid #e0e0e0;
+            color: #1a1a1a;
+            border: 1px solid #e8eaed;
+            border-radius: 4px 14px 14px 14px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
         }
-
-        .user .message-content {
-            background: linear-gradient(135deg, #006e2a 0%, #00c853 100%);
+        .hb-msg.hb-user .hb-msg-bubble {
+            background: linear-gradient(135deg, #0B6E4F, #1a9070);
             color: white;
-            border-radius: 8px 0 8px 8px;
+            border-radius: 14px 4px 14px 14px;
+        }
+        .hb-msg-bubble strong { font-weight: 700; }
+        .hb-msg-bubble a { color: #D4AF37; text-decoration: underline; }
+        .hb-msg.hb-user .hb-msg-bubble a { color: rgba(255,255,255,0.85); }
+
+        /* Typing indicator */
+        .hb-typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+        .hb-typing span {
+            width: 7px; height: 7px;
+            background: #0B6E4F;
+            border-radius: 50%;
+            animation: hb-bounce 1.2s ease-in-out infinite;
+        }
+        .hb-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .hb-typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes hb-bounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+            40% { transform: translateY(-6px); opacity: 1; }
         }
 
-        .chatbot-input-area {
-            padding: 12px;
-            border-top: 1px solid #e0e0e0;
+        /* Suggested questions */
+        .hb-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 10px 16px 4px;
+            background: #f7f8fa;
+            border-top: 1px solid #e8eaed;
+        }
+        .hb-suggestion-btn {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #0B6E4F;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .hb-suggestion-btn:hover {
+            background: #0B6E4F;
+            color: white;
+            border-color: #0B6E4F;
+        }
+
+        /* Input area */
+        .hb-chat-input-area {
+            padding: 12px 14px;
+            background: white;
+            border-top: 1px solid #e8eaed;
             display: flex;
             gap: 8px;
+            align-items: flex-end;
+            flex-shrink: 0;
         }
-
-        .chatbot-input {
+        .hb-chat-input {
             flex: 1;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 10px 12px;
-            font-size: 14px;
+            border: 1.5px solid #e0e5ea;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 13.5px;
             font-family: 'Inter', sans-serif;
             outline: none;
-            transition: all 0.2s ease;
+            transition: border 0.2s, box-shadow 0.2s;
+            resize: none;
+            height: 42px;
+            line-height: 1.4;
+            color: #1a1a1a;
+            background: #fafafa;
         }
-
-        .chatbot-input:focus {
-            border-color: #006e2a;
-            box-shadow: 0 0 0 2px rgba(0, 110, 42, 0.1);
+        .hb-chat-input:focus {
+            border-color: #0B6E4F;
+            box-shadow: 0 0 0 3px rgba(11,110,79,0.1);
+            background: white;
         }
-
-        .chatbot-send {
-            background: linear-gradient(135deg, #006e2a 0%, #00c853 100%);
-            color: white;
+        .hb-chat-input::placeholder { color: #9ca3af; }
+        .hb-chat-send {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, #0B6E4F, #D4AF37);
             border: none;
-            border-radius: 8px;
-            width: 36px;
-            height: 36px;
+            border-radius: 12px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(11,110,79,0.3);
+        }
+        .hb-chat-send:hover { transform: scale(1.06); box-shadow: 0 4px 12px rgba(11,110,79,0.4); }
+        .hb-chat-send:active { transform: scale(0.96); }
+        .hb-chat-send:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+        .hb-chat-send svg { width: 18px; height: 18px; }
+
+        /* Powered by footer */
+        .hb-chat-footer {
+            padding: 6px 14px 8px;
+            background: white;
+            text-align: center;
+            font-size: 10px;
+            color: #9ca3af;
+            font-weight: 500;
+            letter-spacing: 0.2px;
         }
 
-        .chatbot-send:hover {
-            transform: scale(1.05);
-        }
-
-        .chatbot-send:active {
-            transform: scale(0.95);
-        }
-
+        /* Mobile responsive */
         @media (max-width: 480px) {
-            .chatbot-widget {
-                bottom: 16px;
-                right: 16px;
-            }
-
-            .chatbot-container {
+            .hb-chat-widget { bottom: 16px; right: 16px; }
+            .hb-chat-window {
                 width: calc(100vw - 32px);
-                max-height: 60vh;
-                bottom: 72px;
-            }
-
-            .chatbot-messages {
-                height: auto;
-                max-height: calc(60vh - 140px);
+                height: 70vh;
+                bottom: 76px;
+                right: 0;
             }
         }
         */
+
+        /* Platform Card */
+        .hb-platform-card {
+            margin-top: 8px;
+            background: white;
+            border: 1.5px solid #e2eaf0;
+            border-left: 4px solid #0B6E4F;
+            border-radius: 10px;
+            padding: 14px 16px;
+            max-width: 270px;
+            animation: hb-msgIn 0.3s ease;
+            box-shadow: 0 2px 8px rgba(11,110,79,0.07);
+        }
+        .hb-platform-card-label {
+            font-size: 9.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #0B6E4F;
+            margin-bottom: 6px;
+        }
+        .hb-platform-card-link {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            font-weight: 800;
+            color: #111;
+            text-decoration: none;
+            letter-spacing: -0.3px;
+            margin-bottom: 4px;
+            transition: color 0.2s;
+        }
+        .hb-platform-card-link:hover { color: #0B6E4F; }
+        .hb-platform-card-link svg { flex-shrink: 0; }
+        .hb-platform-card-desc {
+            font-size: 11.5px;
+            color: #6b7280;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .hb-platform-card-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 8px;
+        }
+        .hb-platform-card-feature {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #374151;
+            line-height: 1.3;
+        }
+        .hb-platform-card-feature svg {
+            color: #0B6E4F;
+            flex-shrink: 0;
+        }
     </style>
 
-    <!-- CHATBOT WIDGET COMMENTED OUT
-    <div class="chatbot-widget">
-        <button class="chatbot-button" id="chatbot-toggle" title="Chat with us">💬</button>
-        <div class="chatbot-container" id="chatbot-container">
-            <div class="chatbot-header">
-                <h3>Hamara Brand Assistant</h3>
-                <button class="chatbot-close" id="chatbot-close">✕</button>
+    <!-- ===== HAMARA BRAND AI CHATBOT WIDGET ===== -->
+    <div class="hb-chat-widget" id="hb-chat-widget">
+        <!-- FAB Button -->
+        <button class="hb-chat-fab" id="hb-chat-fab" title="Chat with Hamara Brand AI" aria-label="Open AI chat">
+            <span class="hb-chat-ping" id="hb-chat-ping"></span>
+            <!-- Chat icon -->
+            <svg id="hb-icon-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <!-- Close icon (hidden initially) -->
+            <svg id="hb-icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+
+        <!-- Chat Window -->
+        <div class="hb-chat-window" id="hb-chat-window" role="dialog" aria-label="Hamara Brand AI Chat">
+            <!-- Header -->
+            <div class="hb-chat-header">
+                <div class="hb-chat-avatar">HB</div>
+                <div class="hb-chat-header-info">
+                    <div class="hb-chat-header-name">Hamara Brand AI</div>
+                    <div class="hb-chat-header-status">
+                        <span class="hb-status-dot"></span>
+                        Online · Typically replies instantly
+                    </div>
+                </div>
+                <button class="hb-chat-close" id="hb-chat-close-btn" aria-label="Close chat">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
-            <div class="chatbot-messages" id="chatbot-messages"></div>
-            <div class="chatbot-input-area">
-                <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask me anything..." />
-                <button class="chatbot-send" id="chatbot-send">➤</button>
+
+            <!-- Messages -->
+            <div class="hb-chat-messages" id="hb-chat-messages"></div>
+
+            <!-- Suggested Questions (shown until user types) -->
+            <div class="hb-suggestions" id="hb-suggestions">
+                <button class="hb-suggestion-btn" data-q="What media categories do you offer?">All media categories</button>
+                <button class="hb-suggestion-btn" data-q="Which cities do you cover?">City coverage</button>
+                <button class="hb-suggestion-btn" data-q="How do I book a campaign?">Book a campaign</button>
+                <button class="hb-suggestion-btn" data-q="Tell me about Hamara Brand and Myonventure">About the company</button>
             </div>
+
+            <!-- Input Area -->
+            <div class="hb-chat-input-area">
+                <input
+                    type="text"
+                    class="hb-chat-input"
+                    id="hb-chat-input"
+                    placeholder="Ask about services, pricing, cities..."
+                    autocomplete="off"
+                    maxlength="500"
+                />
+                <button class="hb-chat-send" id="hb-chat-send-btn" aria-label="Send message">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+            <div class="hb-chat-footer">Powered by Hamara Brand AI · hamarabrand.in</div>
         </div>
     </div>
-    -->
 
-    <!-- CHATBOT JAVASCRIPT COMMENTED OUT
+    <!-- ===== AI CHATBOT JAVASCRIPT ===== -->
     <script>
-        const chatbotToggle = document.getElementById('chatbot-toggle');
-        const chatbotClose = document.getElementById('chatbot-close');
-        const chatbotContainer = document.getElementById('chatbot-container');
-        const chatbotInput = document.getElementById('chatbot-input');
-        const chatbotSend = document.getElementById('chatbot-send');
-        const chatbotMessages = document.getElementById('chatbot-messages');
+    (function () {
+        'use strict';
 
-        // Chatbot knowledge base with context
-        const chatbotResponses = {
-            services: {
-                keywords: ['service', 'what do you offer', 'offer', 'media', 'advertising', 'ad', 'campaign'],
-                response: `We offer **Premium Transit Media Assets**:\n\n🛺 **Auto Hood Branding** - From ₹5,000/month\n🚌 **Bus Side Panels** - From ₹50,000/month\n🚍 **Bus Back Panels** - From ₹30,000/month\n✦ **Full Bus Wraps** - High impact branding\n🚕 **Cab Branding** - Mobile advertising\n🎯 **PR & Brand Name** - Custom solutions\n\nAll with verified rates and pan-India execution!`
-            },
-            pricing: {
-                keywords: ['price', 'cost', 'rate', 'how much', 'rupees', '₹'],
-                response: `Our pricing is **flexible and transparent**:\n\n💰 **Starting from ₹5,000/month** for auto branding\n💰 **₹30,000-₹50,000/month** for bus advertising\n💰 **Best market rates** guaranteed\n\nGet a **custom proposal in 24 hours**! Each campaign is tailored to your budget and reach requirements.`
-            },
-            locations: {
-                keywords: ['city', 'location', 'where', 'coverage', 'cities', 'delhi', 'mumbai', 'bangalore', 'india'],
-                response: `We operate **Pan-India** with verified media vendors!\n\n🌍 Coverage across all major cities:\n- Mumbai, Delhi, Bangalore\n- Kolkata, Chennai, Hyderabad\n- And 100+ other cities\n\nQuickly deploy campaigns to your **target cities** with our platform.`
-            },
-            getStarted: {
-                keywords: ['how to start', 'begin', 'register', 'signup', 'deploy', 'campaign', 'propose'],
-                response: `Getting started is **easy**!\n\n1️⃣ **Fill the form** on our homepage\n2️⃣ **Select your cities & media type**\n3️⃣ **Choose units & duration**\n4️⃣ **Generate Custom Proposal**\n\nOur **Dedicated Media Strategist** will contact you within **2 business hours**!`
-            },
-            company: {
-                keywords: ['who are you', 'about', 'company', 'trusted', 'why', 'clients'],
-                response: `**Hamara Brand** - India's #1 All Media Marketplace!\n\n✅ **700+ Happy Customers**\n✅ **80+ Team Members**\n✅ **500+ Finished Projects**\n✅ **5+ Awards Winning**\n\nTrusted by: KEI Wires, Ghadi Detergent, ASG Eye Hospital, Jubilant Foods, and 700+ more brands!`
-            },
-            features: {
-                keywords: ['feature', 'benefit', 'advantage', 'why choose', 'verified', 'rates'],
-                response: `Why choose **Hamara Brand**?\n\n✔️ **Verified Media Vendors** - Quality assured\n✔️ **Best Market Rates** - Competitive pricing\n✔️ **Pan-India Execution** - Nationwide reach\n✔️ **Proposal in 24 hours** - Fast turnaround\n✔️ **Dedicated Strategist** - Expert support\n\nYour brand deserves premium visibility!`
-            },
-            contact: {
-                keywords: ['contact', 'phone', 'email', 'call', 'reach out', 'support'],
-                response: `📞 **Contact Us**\n\nVisit our platform: **myonventure.com**\n\nOr fill the **"Deploy Your Campaign"** form on this page to get connected with our team.\n\nWe're here to help! 🚀`
-            },
-            default: `Hi! 👋 I'm the **Hamara Brand Assistant**. I can help you with:\n\n• Our services & pricing\n• Coverage areas\n• How to deploy campaigns\n• Company information\n\nWhat would you like to know?`
-        };
+        // ── Config ──────────────────────────────────────────────────
+        const API_ENDPOINT = '/api/chat';
+        const WELCOME_MSG = `Hello! I am the Hamara Brand AI Assistant, representing Myonventure Pvt. Ltd.\n\nHamara Brand is India's first unified media-tech marketplace. I can assist you with:\n- All media categories: OOH, Transit, Digital, TV, Radio, Cinema, PR and more\n- Pricing, inventory, and city coverage\n- How to plan and book a campaign\n- About the company, clients, and platform\n\nHow can I assist you today?`;
 
-        function findResponse(userMessage) {
-            const lowerMessage = userMessage.toLowerCase();
+        // ── State ───────────────────────────────────────────────────
+        let isOpen = false;
+        let isLoading = false;
+        let conversationHistory = []; // [{role:'user'|'bot', content:'...'}]
+        let pingRemoved = false;
 
-            // Check each category
-            for (const [key, data] of Object.entries(chatbotResponses)) {
-                if (key === 'default') continue;
-                if (data.keywords.some(keyword => lowerMessage.includes(keyword))) {
-                    return data.response;
+        // ── DOM refs ────────────────────────────────────────────────
+        const fab         = document.getElementById('hb-chat-fab');
+        const chatWindow  = document.getElementById('hb-chat-window');
+        const closeBtn    = document.getElementById('hb-chat-close-btn');
+        const messagesEl  = document.getElementById('hb-chat-messages');
+        const inputEl     = document.getElementById('hb-chat-input');
+        const sendBtn     = document.getElementById('hb-chat-send-btn');
+        const suggestionsEl = document.getElementById('hb-suggestions');
+        const iconChat    = document.getElementById('hb-icon-chat');
+        const iconClose   = document.getElementById('hb-icon-close');
+        const pingEl      = document.getElementById('hb-chat-ping');
+
+        // ── Toggle open/close ───────────────────────────────────────
+        function openChat() {
+            isOpen = true;
+            chatWindow.classList.add('hb-open');
+            iconChat.style.display = 'none';
+            iconClose.style.display = 'block';
+            // Remove ping dot once opened
+            if (!pingRemoved) { pingEl.remove(); pingRemoved = true; }
+            // Show welcome message only once
+            if (conversationHistory.length === 0) {
+                addBotMessage(WELCOME_MSG, false);
+            }
+            setTimeout(() => inputEl.focus(), 320);
+        }
+
+        function closeChat() {
+            isOpen = false;
+            chatWindow.classList.remove('hb-open');
+            iconChat.style.display = 'block';
+            iconClose.style.display = 'none';
+        }
+
+        fab.addEventListener('click', () => isOpen ? closeChat() : openChat());
+        closeBtn.addEventListener('click', closeChat);
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (isOpen && !document.getElementById('hb-chat-widget').contains(e.target)) {
+                closeChat();
+            }
+        });
+
+        // ── Suggestion buttons ───────────────────────────────────────
+        suggestionsEl.querySelectorAll('.hb-suggestion-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const q = btn.dataset.q;
+                suggestionsEl.style.display = 'none'; // hide after first use
+                sendMessage(q);
+            });
+        });
+
+        // ── Render helpers ───────────────────────────────────────────
+        function formatText(text) {
+            // Convert **bold**, newlines, and URLs
+            return text
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function scrollBottom() {
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        // Platform card HTML builder
+        function buildPlatformCard() {
+            return `<div class="hb-platform-card">
+                <div class="hb-platform-card-label">Our Main Platform</div>
+                <a href="https://myonventure.com" target="_blank" rel="noopener" class="hb-platform-card-link">
+                    myonventure.com
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+                <div class="hb-platform-card-desc">Register as Media Buyers and Sellers.</div>
+                <div class="hb-platform-card-features">
+                    <div class="hb-platform-card-feature">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Startups &amp; SMEs
+                    </div>
+                    <div class="hb-platform-card-feature">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Corporates &amp; Enterprises
+                    </div>
+                    <div class="hb-platform-card-feature">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        PSU &amp; Government
+                    </div>
+                    <div class="hb-platform-card-feature">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Brand, Marketing &amp; Media
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function addBotMessage(text, animate = true) {
+            // Check for platform card trigger token
+            const showCard = text.includes('[PLATFORM_CARD]');
+            const cleanText = text.replace('[PLATFORM_CARD]', '').trim();
+
+            const wrap = document.createElement('div');
+            wrap.className = 'hb-msg hb-bot';
+            const avatar = document.createElement('div');
+            avatar.className = 'hb-msg-avatar';
+            avatar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+            const contentWrap = document.createElement('div');
+            contentWrap.style.display = 'flex';
+            contentWrap.style.flexDirection = 'column';
+            contentWrap.style.gap = '0';
+            const bubble = document.createElement('div');
+            bubble.className = 'hb-msg-bubble';
+            bubble.innerHTML = formatText(cleanText);
+            contentWrap.appendChild(bubble);
+            if (showCard) {
+                const cardEl = document.createElement('div');
+                cardEl.innerHTML = buildPlatformCard();
+                contentWrap.appendChild(cardEl.firstElementChild);
+            }
+            wrap.appendChild(avatar);
+            wrap.appendChild(contentWrap);
+            messagesEl.appendChild(wrap);
+            scrollBottom();
+            conversationHistory.push({ role: 'bot', content: cleanText });
+        }
+
+        function addUserMessage(text) {
+            const wrap = document.createElement('div');
+            wrap.className = 'hb-msg hb-user';
+            const avatar = document.createElement('div');
+            avatar.className = 'hb-msg-avatar';
+            avatar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+            const bubble = document.createElement('div');
+            bubble.className = 'hb-msg-bubble';
+            bubble.textContent = text;
+            wrap.appendChild(avatar);
+            wrap.appendChild(bubble);
+            messagesEl.appendChild(wrap);
+            scrollBottom();
+            conversationHistory.push({ role: 'user', content: text });
+        }
+
+        function showTyping() {
+            const wrap = document.createElement('div');
+            wrap.className = 'hb-msg hb-bot';
+            wrap.id = 'hb-typing-indicator';
+            const avatar = document.createElement('div');
+            avatar.className = 'hb-msg-avatar';
+            avatar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+            const bubble = document.createElement('div');
+            bubble.className = 'hb-msg-bubble';
+            bubble.innerHTML = '<div class="hb-typing"><span></span><span></span><span></span></div>';
+            wrap.appendChild(avatar);
+            wrap.appendChild(bubble);
+            messagesEl.appendChild(wrap);
+            scrollBottom();
+            return wrap;
+        }
+
+        function removeTyping() {
+            const el = document.getElementById('hb-typing-indicator');
+            if (el) el.remove();
+        }
+
+        // ── Send message ─────────────────────────────────────────────
+        async function sendMessage(text) {
+            const msg = text || inputEl.value.trim();
+            if (!msg || isLoading) return;
+
+            inputEl.value = '';
+            suggestionsEl.style.display = 'none';
+            addUserMessage(msg);
+            setLoading(true);
+            const typingEl = showTyping();
+
+            // Build Gemini-compatible messages (exclude welcome bot msg heuristically)
+            const apiMessages = conversationHistory
+                .filter(m => !(m.role === 'bot' && m.content === WELCOME_MSG))
+                .map(m => ({
+                    role: m.role === 'user' ? 'user' : 'assistant',
+                    content: m.content
+                }));
+
+            try {
+                const res = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: apiMessages })
+                });
+
+                removeTyping();
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    addBotMessage(err.error || 'Sorry, something went wrong. Please try again or call us at **+91-9571115669**.');
+                } else {
+                    const data = await res.json();
+                    addBotMessage(data.reply || 'I couldn\'t get a response. Please contact us at **info@myonventure.com**.');
                 }
+            } catch (err) {
+                removeTyping();
+                addBotMessage('Unable to connect. Please check your internet or contact us directly at **info@myonventure.com** or call **+91-9571115669**.');
+            } finally {
+                setLoading(false);
             }
-
-            return chatbotResponses.default.response;
         }
 
-        function addMessage(text, isUser = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `chatbot-message ${isUser ? 'user' : 'bot'}`;
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.innerHTML = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            messageDiv.appendChild(contentDiv);
-            chatbotMessages.appendChild(messageDiv);
-            
-            // Auto-scroll to bottom
-            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        function setLoading(val) {
+            isLoading = val;
+            sendBtn.disabled = val;
+            inputEl.disabled = val;
+            inputEl.placeholder = val ? 'Thinking...' : 'Ask about services, pricing, cities...';
         }
 
-        function handleSendMessage() {
-            const userText = chatbotInput.value.trim();
-            if (!userText) return;
-
-            // Add user message
-            addMessage(userText, true);
-            chatbotInput.value = '';
-
-            // Add bot response after short delay
-            setTimeout(() => {
-                const response = findResponse(userText);
-                addMessage(response, false);
-            }, 300);
-        }
-
-        // Event listeners
-        chatbotToggle.addEventListener('click', () => {
-            chatbotContainer.classList.add('active');
-            chatbotToggle.classList.add('open');
-            chatbotInput.focus();
-            
-            // Add welcome message on first open
-            if (chatbotMessages.children.length === 0) {
-                addMessage(chatbotResponses.default);
+        // ── Input event listeners ────────────────────────────────────
+        sendBtn.addEventListener('click', () => sendMessage());
+        inputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
             }
         });
 
-        chatbotClose.addEventListener('click', () => {
-            chatbotContainer.classList.remove('active');
-            chatbotToggle.classList.remove('open');
-        });
+        // Auto-open after 4 seconds with a subtle bounce
+        setTimeout(() => {
+            if (!isOpen) {
+                fab.style.animation = 'hb-ping 0.6s ease';
+                setTimeout(() => { fab.style.animation = ''; }, 700);
+            }
+        }, 4000);
 
-        chatbotSend.addEventListener('click', handleSendMessage);
-        chatbotInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleSendMessage();
-        });
+    })();
     </script>
-    -->
-</body>
 
+</body>
 </html>
