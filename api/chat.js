@@ -1,6 +1,7 @@
 // Vercel Serverless Function — Hamara Brand AI Chatbot Proxy
-// API key is read from GEMINI_API_KEY environment variable set in Vercel dashboard.
+// API key is read from GROQ_API_KEY environment variable set in Vercel dashboard.
 
+// ─── SYSTEM PROMPT ────────────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are the official AI Assistant for Hamara Brand — a senior, knowledgeable, and professional representative who helps brands, agencies, and media buyers get the most out of the Hamara Brand platform.
 
 == CORPORATE IDENTITY ==
@@ -164,108 +165,270 @@ When a user's question is about any of the following topics, append the exact to
 
 Only include [PLATFORM_CARD] once, only when relevant, and only at the very end of your response. Do not explain the token — it is invisible to the user.`;
 
-// Simple in-memory rate limiter (works per serverless instance)
-const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 10; // Max 10 messages per minute per IP
+// ─── CONFIGURATION ────────────────────────────────────────────────────────────
 
-export default async function handler(req, res) {
-  // Handle CORS preflight
-  res.setHeader("Access-Control-Allow-Origin", "*");
+/** Sliding-window rate limit: max requests per IP per window */
+const RATE_LIMIT = {
+  WINDOW_MS: 60_000,      // 1 minute
+  MAX_REQUESTS: 10,       // 10 requests per window
+  CLEANUP_INTERVAL: 300_000, // purge stale entries every 5 min
+};
+
+/** Guard against oversized payloads */
+const LIMITS = {
+  MAX_MESSAGE_LENGTH: 2_000,   // chars per user message
+  MAX_HISTORY_MESSAGES: 20,    // keep last N messages to avoid token overflow
+  GROQ_TIMEOUT_MS: 25_000,     // 25 s (Vercel function limit is 30 s)
+};
+
+/** Groq model cascade — first available wins */
+const GROQ_MODELS = [
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant",   // fallback if primary is rate-limited by Groq
+];
+
+/** Allowed origins — tighten this in production */
+const ALLOWED_ORIGINS = [
+  "https://hamarabrand.in",
+  "https://www.hamarabrand.in",
+  "https://hamarabrand.com",
+  "https://www.hamarabrand.com",
+];
+
+// ─── SLIDING WINDOW RATE LIMITER (in-memory) ─────────────────────────────────
+// Note: each Vercel cold-start gets a fresh map. For cross-instance limiting
+// use Vercel KV / Upstash Redis. This provides per-instance protection which
+// is still effective against most abuse since each instance handles ~1 user.
+
+const rateLimitStore = new Map(); // ip → { requests: [timestamp, ...] }
+
+// Periodic cleanup to prevent unbounded memory growth
+let lastCleanup = Date.now();
+
+function isRateLimited(ip) {
+  const now = Date.now();
+
+  // Periodic cleanup
+  if (now - lastCleanup > RATE_LIMIT.CLEANUP_INTERVAL) {
+    for (const [key, val] of rateLimitStore) {
+      const recent = val.requests.filter(t => now - t < RATE_LIMIT.WINDOW_MS);
+      if (recent.length === 0) rateLimitStore.delete(key);
+      else val.requests = recent;
+    }
+    lastCleanup = now;
+  }
+
+  const entry = rateLimitStore.get(ip) || { requests: [] };
+
+  // Sliding window: keep only timestamps within the current window
+  entry.requests = entry.requests.filter(t => now - t < RATE_LIMIT.WINDOW_MS);
+
+  if (entry.requests.length >= RATE_LIMIT.MAX_REQUESTS) {
+    rateLimitStore.set(ip, entry);
+    const oldestRequest = entry.requests[0];
+    const retryAfterSec = Math.ceil((oldestRequest + RATE_LIMIT.WINDOW_MS - now) / 1000);
+    return { limited: true, retryAfter: retryAfterSec };
+  }
+
+  entry.requests.push(now);
+  rateLimitStore.set(ip, entry);
+  return { limited: false };
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+
+/**
+ * Extract the real client IP, resistant to simple spoofing.
+ * On Vercel, `x-real-ip` is the forwarded IP set by their edge.
+ */
+function getClientIp(req) {
+  // Vercel sets x-real-ip reliably
+  const realIp = req.headers["x-real-ip"];
+  if (realIp) return realIp.trim();
+
+  // Fall back to first entry of x-forwarded-for
+  const forwarded = req.headers["x-forwarded-for"];
+  if (forwarded) return forwarded.split(",")[0].trim();
+
+  return req.socket?.remoteAddress || "unknown";
+}
+
+/**
+ * Fetch with a hard timeout. Returns `{ ok, status, data }`.
+ */
+async function fetchWithTimeout(url, options, timeoutMs) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, data };
+  } catch (err) {
+    if (err.name === "AbortError") throw new Error("TIMEOUT");
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Validate and sanitise incoming messages array.
+ */
+function validateMessages(messages) {
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return { valid: false, error: "No messages provided." };
+  }
+
+  for (const msg of messages) {
+    if (!msg || typeof msg !== "object") {
+      return { valid: false, error: "Invalid message format." };
+    }
+    if (!["user", "assistant"].includes(msg.role)) {
+      return { valid: false, error: "Invalid message role." };
+    }
+    if (typeof msg.content !== "string" || msg.content.trim() === "") {
+      return { valid: false, error: "Message content must be a non-empty string." };
+    }
+    if (msg.content.length > LIMITS.MAX_MESSAGE_LENGTH) {
+      return {
+        valid: false,
+        error: `Message too long. Please keep messages under ${LIMITS.MAX_MESSAGE_LENGTH} characters.`,
+      };
+    }
+  }
+  return { valid: true };
+}
+
+// ─── CORS HELPER ─────────────────────────────────────────────────────────────
+
+function setCorsHeaders(req, res) {
+  const origin = req.headers.origin || "";
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+
+  // In development (no origin header or localhost), allow all
+  const isDev =
+    !origin ||
+    origin.startsWith("http://localhost") ||
+    origin.startsWith("http://127.0.0.1");
+
+  res.setHeader("Access-Control-Allow-Origin", isDev ? "*" : allowed);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Vary", "Origin");
+}
+
+// ─── MAIN HANDLER ─────────────────────────────────────────────────────────────
+
+export default async function handler(req, res) {
+  // ── CORS ──
+  setCorsHeaders(req, res);
 
   if (req.method === "OPTIONS") {
-    return res.status(200).end();
+    return res.status(204).end();
   }
 
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({ error: "Method not allowed." });
   }
 
-  // --- IP Rate Limiting ---
-  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress || "unknown_ip";
-  const now = Date.now();
-  
-  if (rateLimitMap.has(ip)) {
-      const userLimits = rateLimitMap.get(ip);
-      // If time window passed, reset
-      if (now - userLimits.startTime > RATE_LIMIT_WINDOW_MS) {
-          rateLimitMap.set(ip, { count: 1, startTime: now });
-      } else {
-          userLimits.count += 1;
-          if (userLimits.count > MAX_REQUESTS_PER_WINDOW) {
-              return res.status(429).json({ error: "Rate limit exceeded. Please wait a minute before sending more messages." });
-          }
-      }
-  } else {
-      rateLimitMap.set(ip, { count: 1, startTime: now });
+  // ── Rate Limiting ──
+  const clientIp = getClientIp(req);
+  const rl = isRateLimited(clientIp);
+  if (rl.limited) {
+    res.setHeader("Retry-After", String(rl.retryAfter));
+    return res.status(429).json({
+      error: `Too many requests. Please wait ${rl.retryAfter} seconds before trying again.`,
+    });
   }
-  // ------------------------
 
-// Vercel Serverless Function — Hamara Brand AI Chatbot Proxy
-// API key is read from GROQ_API_KEY environment variable set in Vercel dashboard.
-
-  // Sanitize API Key (remove potential quotes/spaces)
-  const apiKey = (process.env.GROQ_API_KEY || "").trim().replace(/^["']|["']$/g, '');
-  
+  // ── API Key ──
+  const apiKey = (process.env.GROQ_API_KEY || "").trim().replace(/^["']|["']$/g, "");
   if (!apiKey) {
-    return res.status(500).json({ error: "API key missing in Vercel. Please add GROQ_API_KEY to environment variables." });
+    console.error("[chat] GROQ_API_KEY is not configured.");
+    return res.status(500).json({ error: "Service configuration error. Please contact support." });
   }
 
-  const { messages } = req.body;
-
-  if (!messages || !Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({ error: "No messages provided." });
+  // ── Input Validation ──
+  const { messages } = req.body || {};
+  const validation = validateMessages(messages);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.error });
   }
 
-  // Build Groq/OpenAI compatible conversation history
-  let groqMessages = [
-    { role: 'system', content: SYSTEM_PROMPT }
+  // ── Conversation History Cap (prevent token overflow) ──
+  // Keep the most recent N messages so we don't exceed model context limits.
+  const cappedMessages = messages.slice(-LIMITS.MAX_HISTORY_MESSAGES);
+
+  const groqMessages = [
+    { role: "system", content: SYSTEM_PROMPT },
+    ...cappedMessages.map((msg) => ({
+      role: msg.role === "user" ? "user" : "assistant",
+      content: msg.content.trim(),
+    })),
   ];
-  
-  messages.forEach((msg) => {
-      groqMessages.push({
-          role: msg.role === 'user' ? 'user' : 'assistant',
-          content: msg.content
-      });
-  });
 
-  try {
-    const groqRes = await fetch(
-      `https://api.groq.com/openai/v1/chat/completions`,
-      {
-        method: "POST",
-        headers: { 
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json" 
+  // ── Call Groq with Model Fallback ──
+  let lastError = null;
+
+  for (const model of GROQ_MODELS) {
+    try {
+      const { ok, status, data } = await fetchWithTimeout(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model,
+            messages: groqMessages,
+            temperature: 0.7,
+            max_tokens: 800,
+            top_p: 0.9,
+          }),
         },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: groqMessages,
-          temperature: 0.7,
-          max_tokens: 800,
-          top_p: 0.9,
-        }),
+        LIMITS.GROQ_TIMEOUT_MS
+      );
+
+      if (ok) {
+        const reply =
+          data?.choices?.[0]?.message?.content ||
+          "I apologize, but I could not generate a response. Please contact our support team.";
+        return res.status(200).json({ reply });
       }
-    );
 
-    const data = await groqRes.json();
+      // Groq returned an error status
+      const groqMsg = data?.error?.message || "Unknown Groq error";
+      console.error(`[chat] Groq error (model: ${model}, status: ${status}):`, groqMsg);
 
-    if (!groqRes.ok) {
-        console.error("Groq API Error Detail:", JSON.stringify(data));
-        // Pass more detail to frontend temporarily for debugging
-        return res.status(502).json({ 
-            error: "AI Service Refused", 
-            message: data.error?.message || "Check your API key status and quota." 
-        });
+      // 429 from Groq = quota/rate limit — try next model
+      if (status === 429) {
+        lastError = groqMsg;
+        continue;
+      }
+
+      // For other Groq errors, fail fast
+      return res.status(502).json({
+        error: "The AI service returned an error. Please try again shortly.",
+      });
+    } catch (err) {
+      if (err.message === "TIMEOUT") {
+        console.error(`[chat] Groq request timed out (model: ${model})`);
+        lastError = "timeout";
+        continue; // try fallback model
+      }
+      console.error(`[chat] Unexpected error (model: ${model}):`, err);
+      // Don't leak internal error details to the client
+      return res.status(500).json({
+        error: "An unexpected error occurred. Please try again.",
+      });
     }
-
-    const reply = data?.choices?.[0]?.message?.content || "I apologize, but I couldn't generate a response. Please contact support.";
-    return res.status(200).json({ reply });
-
-  } catch (err) {
-    console.error("Serverless Function Error:", err);
-    return res.status(500).json({ error: "Internal Server Error", details: err.message });
   }
+
+  // All models exhausted
+  console.error("[chat] All Groq models failed. Last error:", lastError);
+  return res.status(503).json({
+    error: "The AI service is temporarily unavailable. Please try again in a moment.",
+  });
 }
