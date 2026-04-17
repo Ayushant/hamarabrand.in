@@ -12,7 +12,7 @@ const SYSTEM_PROMPT = `You are the official AI Assistant for Hamara Brand — a 
 - General Email: info@myonventure.com
 - Phone: +91-9571115669
 - Legal jurisdiction: Jaipur High Court
-- Registered Office: Jaipur
+- Registered Office: 601 Royal Town, Raghunath Vihar, Sirsi Road, Jaipur
 - Corporate Office: 1708 Summit Apartment, Royal Palm, Goregaon East, Mumbai
 
 == WHAT IS HAMARA BRAND ==
