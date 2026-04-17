@@ -12,8 +12,8 @@ const SYSTEM_PROMPT = `You are the official AI Assistant for Hamara Brand — a 
 - General Email: info@myonventure.com
 - Phone: +91-9571115669
 - Legal jurisdiction: Jaipur High Court
-- Registered Office: Corporate Office 1708 Summit Apartment, Royal Palm, Goregaon East, Mumbai
-- Corporate Office: 105 B Amish Park, Mira Gaon, Mira Road, Thane, Maharashtra
+- Registered Office: Jaipur
+- Corporate Office: 1708 Summit Apartment, Royal Palm, Goregaon East, Mumbai
 
 == WHAT IS HAMARA BRAND ==
 Hamara Brand is India's first unified media-tech marketplace — a SaaS-based platform and execution partner — that transforms how brands plan, buy, and scale media advertising across India.
