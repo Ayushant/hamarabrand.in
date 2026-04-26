@@ -902,13 +902,6 @@
                 return;
             }
 
-            // Bot speed check — real humans take > 3 seconds
-            if (Date.now() - formLoadedAt < 3000) {
-                submitBtn.innerText = 'Thank You!';
-                setTimeout(() => { closeModal(); form.reset(); submitBtn.innerText = 'Submit Request'; submitBtn.disabled = false; }, 1500);
-                return;
-            }
-
             // Client-side phone validation
             const phoneInput = form.querySelector('[name="phone"]').value.trim();
             if (!/^[\d\s\+\-\(\)]{7,20}$/.test(phoneInput)) {
