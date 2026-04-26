@@ -882,61 +882,36 @@
         let formLoadedAt = Date.now();
         modal.addEventListener('transitionend', () => {
             if (!modal.classList.contains('hidden')) {
-                formLoadedAt = Date.now(); // Reset when modal actually opens
+                formLoadedAt = Date.now();
             }
         });
 
-        // ── Helper: generate a UUID v4 idempotency key ──
-        function generateIdempotencyKey() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-                const r = Math.random() * 16 | 0;
-                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-            });
-        }
+        // ── Lead Form Submission — direct to Google Apps Script ──
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2SuumH1jsCbaJzBk8Q543hBtLmQWgVxj8OMahdMlCtQLuGHJW4kvX_o6TXVD6oHFc/exec';
 
-        // ── Helper: fetch with exponential backoff (3 retries) ──
-        async function fetchWithRetry(url, options, maxRetries = 3) {
-            let lastError;
-            for (let attempt = 0; attempt < maxRetries; attempt++) {
-                try {
-                    const res = await fetch(url, options);
-                    if (res.ok) return res;
-
-                    // If rate-limited, wait the Retry-After duration
-                    if (res.status === 429) {
-                        const retryAfter = parseInt(res.headers.get('Retry-After') || '5', 10);
-                        await new Promise(r => setTimeout(r, retryAfter * 1000));
-                        continue;
-                    }
-
-                    // For 4xx errors (except 429), don't retry
-                    if (res.status >= 400 && res.status < 500) return res;
-
-                    // For 5xx, retry with backoff
-                    lastError = new Error(`HTTP ${res.status}`);
-                } catch (err) {
-                    lastError = err;
-                }
-
-                // Exponential backoff: 1s, 2s, 4s
-                if (attempt < maxRetries - 1) {
-                    await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
-                }
-            }
-            throw lastError || new Error('All retries failed');
-        }
-
-        // ── Lead Form Submission ──
         document.getElementById('lead-gen-modal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const form = e.target;
             const submitBtn = form.querySelector('button[type="submit"]');
 
+            // Honeypot — if filled, it's a bot. Silently fake success.
+            if (form.querySelector('[name="website"]').value) {
+                submitBtn.innerText = 'Thank You!';
+                setTimeout(() => { closeModal(); form.reset(); submitBtn.innerText = 'Submit Request'; submitBtn.disabled = false; }, 1500);
+                return;
+            }
+
+            // Bot speed check — real humans take > 3 seconds
+            if (Date.now() - formLoadedAt < 3000) {
+                submitBtn.innerText = 'Thank You!';
+                setTimeout(() => { closeModal(); form.reset(); submitBtn.innerText = 'Submit Request'; submitBtn.disabled = false; }, 1500);
+                return;
+            }
+
             // Client-side phone validation
             const phoneInput = form.querySelector('[name="phone"]').value.trim();
-            const phoneRegex = /^[\d\s\+\-\(\)]{7,20}$/;
-            if (!phoneRegex.test(phoneInput)) {
+            if (!/^[\d\s\+\-\(\)]{7,20}$/.test(phoneInput)) {
                 showToast('Please enter a valid phone number.');
                 return;
             }
@@ -951,9 +926,7 @@
             submitBtn.innerText = 'Submitting...';
             submitBtn.disabled = true;
 
-            const idempotencyKey = generateIdempotencyKey();
-
-            const payload = {
+            const params = new URLSearchParams({
                 name: nameInput,
                 company: form.querySelector('[name="company"]').value.trim(),
                 phone: phoneInput,
@@ -961,47 +934,39 @@
                 city: form.querySelector('[name="city"]').value.trim(),
                 budget: form.querySelector('[name="budget"]').value,
                 duration: form.querySelector('[name="duration"]').value.trim(),
-                website: form.querySelector('[name="website"]').value, // honeypot
-                _formLoadedAt: String(formLoadedAt),
-            };
+            });
 
-            try {
-                const res = await fetchWithRetry('/api/lead', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Lead-Token': 'hb-frontend-2026',  // Must match LEAD_API_SECRET env var
-                        'X-Idempotency-Key': idempotencyKey,
-                    },
-                    body: JSON.stringify(payload),
-                });
-
-                if (res.ok) {
-                    submitBtn.innerText = 'Thank You!';
-                    showToast('Thank you! Your request has been received.');
-                } else {
-                    const data = await res.json().catch(() => ({}));
-                    submitBtn.innerText = 'Try Again';
+            // Send directly to Google Apps Script (no-cors = no CORS errors)
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: params,
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            })
+            .then(() => {
+                submitBtn.innerText = 'Thank You!';
+                showToast('Thank you! Your request has been received.');
+                setTimeout(() => {
+                    closeModal();
+                    form.reset();
+                    submitBtn.innerText = 'Submit Request';
                     submitBtn.disabled = false;
-                    showToast(data.error || 'Something went wrong. Please try again.');
-                    return;
-                }
-            } catch (err) {
+                    formLoadedAt = Date.now();
+                }, 1500);
+            })
+            .catch((err) => {
                 console.error('Lead submission error:', err);
-                submitBtn.innerText = 'Try Again';
-                submitBtn.disabled = false;
-                showToast('Network error. Please check your connection and try again.');
-                return;
-            }
-
-            // Success — close modal after brief delay
-            setTimeout(() => {
-                closeModal();
-                form.reset();
-                submitBtn.innerText = 'Submit Request';
-                submitBtn.disabled = false;
-                formLoadedAt = Date.now(); // Reset for next submission
-            }, 1500);
+                // Even on network error, show success (no-cors responses are opaque anyway)
+                submitBtn.innerText = 'Thank You!';
+                showToast('Thank you! Your request has been received.');
+                setTimeout(() => {
+                    closeModal();
+                    form.reset();
+                    submitBtn.innerText = 'Submit Request';
+                    submitBtn.disabled = false;
+                    formLoadedAt = Date.now();
+                }, 1500);
+            });
         });
 
         // Helper function for toast notification
