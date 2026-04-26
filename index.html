@@ -815,6 +815,11 @@
                             class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
                             placeholder="e.g. 3 Months" type="text" />
                     </div>
+                    <!-- Honeypot — invisible to humans, bots fill it -->
+                    <div style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;overflow:hidden;" aria-hidden="true" tabindex="-1">
+                        <label for="website">Website</label>
+                        <input type="text" name="website" id="hb-honeypot" autocomplete="off" tabindex="-1" />
+                    </div>
                     <button type="submit"
                         class="w-full kinetic-gradient text-on-primary font-bold py-4 rounded-md shadow-lg shadow-primary/30 mt-4 active:scale-95 transform transition-all">
                         Submit Request
@@ -873,74 +878,130 @@
             }
         });
 
-        document.getElementById('lead-gen-modal-form').addEventListener('submit', (e) => {
+        // ── Track when the form was loaded (bot speed detection) ──
+        let formLoadedAt = Date.now();
+        modal.addEventListener('transitionend', () => {
+            if (!modal.classList.contains('hidden')) {
+                formLoadedAt = Date.now(); // Reset when modal actually opens
+            }
+        });
+
+        // ── Helper: generate a UUID v4 idempotency key ──
+        function generateIdempotencyKey() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                const r = Math.random() * 16 | 0;
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+
+        // ── Helper: fetch with exponential backoff (3 retries) ──
+        async function fetchWithRetry(url, options, maxRetries = 3) {
+            let lastError;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const res = await fetch(url, options);
+                    if (res.ok) return res;
+
+                    // If rate-limited, wait the Retry-After duration
+                    if (res.status === 429) {
+                        const retryAfter = parseInt(res.headers.get('Retry-After') || '5', 10);
+                        await new Promise(r => setTimeout(r, retryAfter * 1000));
+                        continue;
+                    }
+
+                    // For 4xx errors (except 429), don't retry
+                    if (res.status >= 400 && res.status < 500) return res;
+
+                    // For 5xx, retry with backoff
+                    lastError = new Error(`HTTP ${res.status}`);
+                } catch (err) {
+                    lastError = err;
+                }
+
+                // Exponential backoff: 1s, 2s, 4s
+                if (attempt < maxRetries - 1) {
+                    await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
+                }
+            }
+            throw lastError || new Error('All retries failed');
+        }
+
+        // ── Lead Form Submission ──
+        document.getElementById('lead-gen-modal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const form = e.target;
             const submitBtn = form.querySelector('button[type="submit"]');
 
-            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2SuumH1jsCbaJzBk8Q543hBtLmQWgVxj8OMahdMlCtQLuGHJW4kvX_o6TXVD6oHFc/exec';
+            // Client-side phone validation
+            const phoneInput = form.querySelector('[name="phone"]').value.trim();
+            const phoneRegex = /^[\d\s\+\-\(\)]{7,20}$/;
+            if (!phoneRegex.test(phoneInput)) {
+                showToast('Please enter a valid phone number.');
+                return;
+            }
+
+            // Client-side name validation
+            const nameInput = form.querySelector('[name="name"]').value.trim();
+            if (nameInput.length < 2) {
+                showToast('Please enter your full name.');
+                return;
+            }
 
             submitBtn.innerText = 'Submitting...';
             submitBtn.disabled = true;
 
-            // Collect form data into URL parameters
-            const formData = new FormData(form);
-            const params = new URLSearchParams();
-            
-            const formValues = {
-                name: form.querySelector('[name="name"]').value,
-                company: form.querySelector('[name="company"]').value,
-                phone: form.querySelector('[name="phone"]').value,
-                service: form.querySelector('[name="service"]').value,
-                city: form.querySelector('[name="city"]').value,
+            const idempotencyKey = generateIdempotencyKey();
+
+            const payload = {
+                name: nameInput,
+                company: form.querySelector('[name="company"]').value.trim(),
+                phone: phoneInput,
+                service: form.querySelector('[name="service"]').value.trim(),
+                city: form.querySelector('[name="city"]').value.trim(),
                 budget: form.querySelector('[name="budget"]').value,
-                duration: form.querySelector('[name="duration"]').value
+                duration: form.querySelector('[name="duration"]').value.trim(),
+                website: form.querySelector('[name="website"]').value, // honeypot
+                _formLoadedAt: String(formLoadedAt),
             };
-            
-            Object.keys(formValues).forEach(key => {
-                params.append(key, formValues[key]);
-            });
 
-            console.log('Sending proposal data:', formValues);
-            console.log('Google Apps Script URL:', GOOGLE_SCRIPT_URL);
+            try {
+                const res = await fetchWithRetry('/api/lead', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Lead-Token': 'hb-frontend-2026',  // Must match LEAD_API_SECRET env var
+                        'X-Idempotency-Key': idempotencyKey,
+                    },
+                    body: JSON.stringify(payload),
+                });
 
-            // Send data to Google Apps Script
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Critical for Google Apps Script to work without CORS errors
-                body: params,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                if (res.ok) {
+                    submitBtn.innerText = 'Thank You!';
+                    showToast('Thank you! Your request has been received.');
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    submitBtn.innerText = 'Try Again';
+                    submitBtn.disabled = false;
+                    showToast(data.error || 'Something went wrong. Please try again.');
+                    return;
                 }
-            })
-            .then(response => {
-                // Since we use no-cors, the response is opaque (status 0) but the request was sent.
-                submitBtn.innerText = 'Thank You!';
-                submitBtn.disabled = true;
-                showToast('Thank you! Your request has been received.');
-                
-                // Close modal and reset form after brief delay
-                setTimeout(() => {
-                    closeModal();
-                    form.reset();
-                    submitBtn.innerText = 'Submit Request';
-                    submitBtn.disabled = false;
-                }, 1500);
-            })
-            .catch((error) => {
-                console.error('Fetch error:', error);
-                submitBtn.innerText = 'Thank You!';
-                submitBtn.disabled = true;
-                showToast('Thank you! Your request has been received.');
-                
-                setTimeout(() => {
-                    closeModal();
-                    form.reset();
-                    submitBtn.innerText = 'Submit Request';
-                    submitBtn.disabled = false;
-                }, 1500);
-            });
+            } catch (err) {
+                console.error('Lead submission error:', err);
+                submitBtn.innerText = 'Try Again';
+                submitBtn.disabled = false;
+                showToast('Network error. Please check your connection and try again.');
+                return;
+            }
+
+            // Success — close modal after brief delay
+            setTimeout(() => {
+                closeModal();
+                form.reset();
+                submitBtn.innerText = 'Submit Request';
+                submitBtn.disabled = false;
+                formLoadedAt = Date.now(); // Reset for next submission
+            }, 1500);
         });
 
         // Helper function for toast notification
@@ -1008,13 +1069,16 @@
             }
         });
 
-        document.getElementById('custom-lang-dropdown').addEventListener('change', function () {
-            const googSelect = document.querySelector('.goog-te-combo');
-            if (googSelect) {
-                googSelect.value = this.value;
-                googSelect.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
-            }
-        });
+        const customLangDropdown = document.getElementById('custom-lang-dropdown');
+        if (customLangDropdown) {
+            customLangDropdown.addEventListener('change', function () {
+                const googSelect = document.querySelector('.goog-te-combo');
+                if (googSelect) {
+                    googSelect.value = this.value;
+                    googSelect.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+                }
+            });
+        }
 
         // Language / Translate button
         document.getElementById('footer-language-btn').addEventListener('click', () => {

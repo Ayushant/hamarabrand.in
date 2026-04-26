@@ -5,10 +5,11 @@
   "description": "Hamara Brand Web & AI Chatbot",
   "main": "index.html",
   "scripts": {
-    "start": "serve"
+    "start": "serve",
+    "dev": "npx vercel dev --listen 3000"
   },
-  "dependencies": {},
   "devDependencies": {
-    "serve": "^14.2.0"
+    "serve": "^14.2.0",
+    "vercel": "^52.0.0"
   }
 }
