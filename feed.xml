@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hamara Brand - Enterprise Transit Media Marketplace</title>
+    <link>https://hamarabrand.in</link>
+    <description>India's No.1 Enterprise Transit Media Marketplace. Book advertising on buses, autos, and cabs across India. Get best rates, pan-India execution, and fast proposals.</description>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 05 May 2026 00:00:00 GMT</lastBuildDate>
+    <atom:link href="https://hamarabrand.in/feed.xml" rel="self" type="application/rss+xml"/>
+    
+    <item>
+      <title>Hamara Brand - India's Premier Transit Media Marketplace</title>
+      <link>https://hamarabrand.in</link>
+      <guid>https://hamarabrand.in</guid>
+      <pubDate>Wed, 05 May 2026 00:00:00 GMT</pubDate>
+      <description>Hamara Brand connects businesses with India's most dynamic advertising channel - transit media on buses, autos, and cabs across India. We provide best rates, pan-India execution capability, and rapid proposal turnaround for enterprise advertising campaigns.</description>
+      <content:encoded><![CDATA[
+        <h2>Hamara Brand - Enterprise Transit Media Marketplace</h2>
+        <p>India's No.1 Enterprise Transit Media Marketplace offering:</p>
+        <ul>
+          <li>Pan-India advertising on buses, autos, and cabs</li>
+          <li>Competitive rates and transparent pricing</li>
+          <li>Fast proposal generation and execution</li>
+          <li>Enterprise-grade service and support</li>
+        </ul>
+        <p>Contact us today to launch your campaign.</p>
+      ]]></content:encoded>
+    </item>
+  </channel>
+</rss>
