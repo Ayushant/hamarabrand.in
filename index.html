@@ -1721,51 +1721,76 @@
 
         // ── Extract lead data from conversation history ───────────────
         function extractLeadData() {
-            const allText = conversationHistory.map(m => m.content).join(' \n ');
             const userMessages = conversationHistory.filter(m => m.role === 'user').map(m => m.content);
+            const botMsgs      = conversationHistory.filter(m => m.role === 'bot').map(m => m.content);
+            const allUserText  = userMessages.join(' \n ');
 
-            // Detect bot mode
+            // ── Detect bot mode ──
             let botMode = 'buyer';
-            const firstUserMsg = (userMessages[0] || '').toLowerCase().trim();
-            if (firstUserMsg === '2' || firstUserMsg.includes('partner') || firstUserMsg.includes('owner') || firstUserMsg.includes('agency')) {
+            const firstMsg = (userMessages[0] || '').toLowerCase().trim();
+            if (firstMsg === '2' || /partner|owner|agency|reseller|aggregator|production/i.test(firstMsg)) {
                 botMode = 'partner';
             }
 
-            // Regex helpers
-            const phoneMatch = allText.match(/(?:^|\s)(\+?91[-\s]?)?([6-9]\d{9})(?:\s|$|,)/m);
-            const emailMatch = allText.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/m);
-            const budgetMatch = allText.match(/(?:₹|Rs\.?)?\s*(\d+[LCK]?[\s–\-]?[\d]*[LCK]?)/i);
+            // ── Global phone scan: handles "name, 9876543210" and "+91 9876543210" ──
+            const phoneRegex = /(?:^|[\s,;:\-])(\+?91[\s\-]?)?([6-9]\d{9})(?=[\s,;:\-]|$)/gm;
+            const phoneMatch = phoneRegex.exec(allUserText);
+            let phone = phoneMatch ? ((phoneMatch[1] || '') + phoneMatch[2]).replace(/[\s\-]/g, '') : '';
 
-            // Extract fields from user messages heuristically
-            // Name: first user message that looks like a name (2-4 words, no numbers)
-            let name = '', company = '', designation = '', phone = '', email = '', city = '', budget = '', service = '', category = '';
+            // ── Global email scan ──
+            const emailMatch = allUserText.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+            const email = emailMatch ? emailMatch[0] : '';
 
-            // After bot asks name (step B2/P3), user's next message is likely the name
-            const botMsgs = conversationHistory.filter(m => m.role === 'bot').map(m => m.content);
+            // ── Fields extracted by question context ──
+            let name = '', company = '', designation = '', city = '', budget = '', service = '', category = '', duration = '', objective = '';
+
             userMessages.forEach((msg, idx) => {
-                const prevBot = botMsgs[idx] || '';
+                const prevBot = (botMsgs[idx] || '').toLowerCase();
                 const m = msg.trim();
-                if (/full name/i.test(prevBot) || /your name/i.test(prevBot)) name = name || m;
-                if (/company name/i.test(prevBot)) company = company || m;
-                if (/designation/i.test(prevBot) || /role/i.test(prevBot)) designation = designation || m;
-                if (/mobile|phone|whatsapp/i.test(prevBot)) phone = phone || m;
-                if (/email/i.test(prevBot)) email = email || m;
-                if (/city|hq location/i.test(prevBot)) city = city || m;
-                if (/budget/i.test(prevBot)) budget = budget || m;
-                if (/categor|interest|operat/i.test(prevBot)) service = service || m;
-                if (/type of business|what best describes/i.test(prevBot)) category = category || m;
+                if (/full name|your name/i.test(prevBot))                name        = name        || m;
+                if (/company name/i.test(prevBot))                       company     = company     || m;
+                if (/designation|your role/i.test(prevBot))              designation = designation || m;
+                if (/mobile|phone|whatsapp/i.test(prevBot))              phone       = phone       || m;
+                if (/email/i.test(prevBot))                              email_ctx   = email || m; // eslint-disable-line
+                if (/city|hq location/i.test(prevBot))                  city        = city        || m;
+                if (/budget/i.test(prevBot))                             budget      = budget      || m;
+                if (/categor|advertising categor|operat in/i.test(prevBot)) service  = service    || m;
+                if (/business type|best describes|what best/i.test(prevBot)) category = category  || m;
+                if (/duration|how long/i.test(prevBot))                  duration    = duration    || m;
+                if (/objective|main goal/i.test(prevBot))                objective   = objective   || m;
             });
 
-            // Fallback: regex scan
-            if (!phone && phoneMatch) phone = (phoneMatch[1] || '') + phoneMatch[2];
-            if (!email && emailMatch) email = emailMatch[0];
-            if (!budget && budgetMatch) budget = budgetMatch[0];
+            // ── Fallback name: first user msg that is only letters/spaces, 2–5 words, not a keyword ──
+            if (!name) {
+                for (const msg of userMessages) {
+                    const clean = msg.trim();
+                    if (/^[a-zA-Z][a-zA-Z\s.\-]{2,40}$/.test(clean)
+                        && clean.split(/\s+/).length >= 1
+                        && clean.split(/\s+/).length <= 5
+                        && !/^(yes|no|1|2|3|4|5|buyer|partner|owner|agency|ooh|digital|tv|radio|pr|btl|na)$/i.test(clean)) {
+                        name = clean;
+                        break;
+                    }
+                }
+            }
 
-            // Collect all user messages as extras
+            // ── Combo pattern: "Firstname Lastname, 9876543210" in one message ──
+            if (!phone) {
+                for (const msg of userMessages) {
+                    const combo = msg.match(/^([a-zA-Z][a-zA-Z\s.]{1,40})[,\-\s]+(\+?91[\s\-]?)?([6-9]\d{9})/);
+                    if (combo) {
+                        name  = name  || combo[1].trim();
+                        phone = phone || ((combo[2] || '') + combo[3]).replace(/[\s\-]/g, '');
+                        break;
+                    }
+                }
+            }
+
+            // ── All Q&A as raw extras (stored in BotLeads tab) ──
             const extras = {};
-            userMessages.forEach((m, i) => { extras[`q${i+1}`] = m; });
+            userMessages.forEach((m, i) => { extras[`q${i + 1}`] = m; });
 
-            return { botMode, name, company, designation, phone, email, city, budget, service, category, extras };
+            return { botMode, name, company, designation, phone, email, city, budget, service, category, duration, objective, extras };
         }
 
         // ── Submit lead data to /api/lead-bot → Google Sheets ────────
