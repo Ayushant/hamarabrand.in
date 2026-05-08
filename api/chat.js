@@ -452,31 +452,15 @@ export default async function handler(req, res) {
         return res.status(200).json({ reply });
       }
 
-      // Groq returned an error status
+      // Groq returned an error status — ALWAYS try next model
       const groqMsg = data?.error?.message || "Unknown Groq error";
       console.error(`[chat] Groq error (model: ${model}, status: ${status}):`, groqMsg);
-
-      // 429/503 from Groq = quota/rate limit — try next model
-      if (status === 429 || status === 503 || status === 500) {
-        lastError = groqMsg;
-        continue;
-      }
-
-      // For other Groq errors, fail fast
-      return res.status(502).json({
-        error: "The AI service returned an error. Please try again shortly.",
-      });
+      lastError = `${model}: ${status} - ${groqMsg}`;
+      continue;
     } catch (err) {
-      if (err.message === "TIMEOUT") {
-        console.error(`[chat] Groq request timed out (model: ${model})`);
-        lastError = "timeout";
-        continue; // try fallback model
-      }
-      console.error(`[chat] Unexpected error (model: ${model}):`, err);
-      // Don't leak internal error details to the client
-      return res.status(500).json({
-        error: "An unexpected error occurred. Please try again.",
-      });
+      console.error(`[chat] Error with model ${model}:`, err.message || err);
+      lastError = `${model}: ${err.message || "unknown"}`;
+      continue; // always try next model
     }
   }
 
