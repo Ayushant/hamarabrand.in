@@ -9,6 +9,9 @@
   "functions": {
     "api/chat.js": {
       "maxDuration": 30
+    },
+    "api/lead-bot.js": {
+      "maxDuration": 30
     }
   },
   "redirects": [
@@ -22,6 +25,10 @@
     {
       "source": "/api/chat",
       "destination": "/api/chat.js"
+    },
+    {
+      "source": "/api/lead-bot",
+      "destination": "/api/lead-bot.js"
     }
   ],
   "headers": [

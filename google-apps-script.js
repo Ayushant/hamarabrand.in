@@ -1,42 +1,32 @@
 /**
- * HARDENED GOOGLE APPS SCRIPT — Hamara Brand Lead Collection
- * 
- * INSTRUCTIONS:
- * 1. Open your Google Sheet: https://docs.google.com/spreadsheets/d/1cKaHckuLttZsbd2jPRN8HckSO1RoINjGdrj_XFY6Vnk/edit
- * 2. Click on "Extensions" > "Apps Script"
- * 3. Delete any code in the editor and paste ALL the code below
- * 4. Add headers to Row 1: A1: Timestamp, B1: Name, C1: Company, D1: Phone, E1: Service, F1: City, G1: Budget, H1: Duration, I1: Source
- * 5. Save, then Deploy > New deployment > Web app
- * 6. Execute as: Me | Who has access: Anyone
- * 7. Copy the Web app URL and set it in your environment / code
- * 
- * SECURITY FEATURES:
- * - LockService to prevent row collisions under concurrent writes
- * - Secret token verification (shared between Vercel API and this script)
- * - Server-side field validation (phone regex, length limits, required fields)
- * - Rate-limiting awareness via proper HTTP status codes
+ * HAMARA BRAND — Super AI Bot + Lead Collection Google Apps Script
+ *
+ * SETUP:
+ * 1. Open your Google Sheet
+ * 2. Extensions > Apps Script > Paste this entire file > Save
+ * 3. Sheet1 (normal lead form): Timestamp | Name | Company | Phone | Service | City | Budget | Duration | Source
+ * 4. Create a 2nd tab named "BotLeads": Timestamp | BotMode | Name | Company | Designation | Phone | Email | City | Budget | Service | Category | LeadScore | AllAnswers
+ * 5. Deploy > New Deployment > Web App > Execute as Me, Anyone can access
+ * 6. Copy the Web App URL to your Vercel env vars
  */
 
-const SHEET_NAME = 'Sheet1'; // Change this if your tab is named differently
+const SHEET_NAME      = 'Sheet1';    // Normal lead form tab
+const BOT_SHEET_NAME  = 'BotLeads'; // Super AI Bot leads tab
 
 /**
- * Shared secret — must match the GOOGLE_SCRIPT_SECRET env var on Vercel.
- * Change this to a long random string and keep it secret.
+ * Shared secret — must match process.env.GOOGLE_SCRIPT_SECRET in Vercel.
  */
 const SECRET_TOKEN = 'hb-lead-secret-2026-change-me';
 
-/**
- * Validation rules
- */
 const VALIDATION = {
   NAME_MAX: 120,
   COMPANY_MAX: 120,
-  PHONE_REGEX: /^[\d\s\+\-\(\)]{7,20}$/, // 7-20 chars, digits/spaces/+/-/()
+  PHONE_REGEX: /^[\d\s\+\-\(\)]{7,20}$/,
   SERVICE_MAX: 200,
   CITY_MAX: 100,
   BUDGET_MAX: 100,
   DURATION_MAX: 100,
-  REQUIRED_FIELDS: ['name', 'phone'], // Minimum required
+  REQUIRED_FIELDS: ['name', 'phone'],
 };
 
 function doPost(e) {
@@ -47,14 +37,23 @@ function doPost(e) {
   }
 
   // ── Honeypot Check ──
-  // If the hidden "website" field has any value, it's a bot
   const honeypot = e.parameter.website || '';
   if (honeypot.length > 0) {
-    // Silently accept (don't let bots know they were caught)
     return _jsonResponse(200, { result: 'success', row: [] });
   }
 
-  // ── Extract & Validate Fields ──
+  const source = _sanitize(e.parameter.source || 'website', 50);
+
+  // ── Route to correct handler ──
+  if (source === 'super-ai-bot') {
+    return _handleBotLead(e);
+  } else {
+    return _handleFormLead(e);
+  }
+}
+
+// ── Normal Lead Form ──────────────────────────────────────────────────────────
+function _handleFormLead(e) {
   const name     = _sanitize(e.parameter.name, VALIDATION.NAME_MAX);
   const company  = _sanitize(e.parameter.company, VALIDATION.COMPANY_MAX);
   const phone    = _sanitize(e.parameter.phone, 20);
@@ -64,61 +63,86 @@ function doPost(e) {
   const duration = _sanitize(e.parameter.duration, VALIDATION.DURATION_MAX);
   const source   = _sanitize(e.parameter.source || 'website', 50);
 
-  // Required field check
   if (!name || !phone) {
     return _jsonResponse(400, { result: 'error', error: 'Name and Phone are required.' });
   }
-
-  // Phone format check
   if (!VALIDATION.PHONE_REGEX.test(phone)) {
     return _jsonResponse(400, { result: 'error', error: 'Invalid phone number format.' });
   }
 
-  // ── Write to Sheet with Lock (prevents row collisions) ──
   const lock = LockService.getScriptLock();
   try {
-    // Wait up to 10 seconds to acquire the lock
     lock.waitLock(10000);
-
-    const doc = SpreadsheetApp.getActiveSpreadsheet();
+    const doc   = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = doc.getSheetByName(SHEET_NAME) || doc.getSheets()[0];
-
-    const rowData = [
-      new Date(),
-      name,
-      company,
-      phone,
-      service,
-      city,
-      budget,
-      duration,
-      source
-    ];
-
+    const rowData = [new Date(), name, company, phone, service, city, budget, duration, source];
     sheet.appendRow(rowData);
     lock.releaseLock();
-
     return _jsonResponse(200, { result: 'success', row: rowData });
-
   } catch (error) {
-    // Release lock if we still hold it
     try { lock.releaseLock(); } catch (_) {}
-
-    // Check if it's a lock timeout (too many concurrent writes)
     if (error.toString().includes('Lock timeout')) {
       return _jsonResponse(429, { result: 'error', error: 'Server busy. Please retry.' });
     }
+    return _jsonResponse(500, { result: 'error', error: error.toString() });
+  }
+}
 
+// ── Super AI Bot Lead ─────────────────────────────────────────────────────────
+function _handleBotLead(e) {
+  const botMode     = _sanitize(e.parameter.service || 'buyer', 20).split('|')[0].trim(); // service field encodes multiple values
+  const name        = _sanitize(e.parameter.name, VALIDATION.NAME_MAX);
+  const company     = _sanitize(e.parameter.company, VALIDATION.COMPANY_MAX);
+  const phone       = _sanitize(e.parameter.phone, 20);
+  const service     = _sanitize(e.parameter.service, 500);
+  const city        = _sanitize(e.parameter.city, 300);
+  const budget      = _sanitize(e.parameter.budget, VALIDATION.BUDGET_MAX);
+  const duration    = _sanitize(e.parameter.duration, VALIDATION.DURATION_MAX);
+
+  // Score the lead
+  let leadScore = 'COLD';
+  const budgetLower = budget.toLowerCase();
+  if (budgetLower.includes('1cr') || budgetLower.includes('₹1cr') || budgetLower.includes('crore')) leadScore = 'HOT';
+  else if (budgetLower.includes('25l') || budgetLower.includes('₹25') || budgetLower.includes('lakh')) leadScore = 'WARM';
+  else if (budgetLower.includes('5l') || budgetLower.includes('₹5')) leadScore = 'WARM';
+
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    const doc = SpreadsheetApp.getActiveSpreadsheet();
+
+    // Get or create BotLeads sheet
+    let botSheet = doc.getSheetByName(BOT_SHEET_NAME);
+    if (!botSheet) {
+      botSheet = doc.insertSheet(BOT_SHEET_NAME);
+      // Add headers
+      botSheet.appendRow([
+        'Timestamp', 'Bot Mode', 'Name', 'Company', 'Phone',
+        'Service/Category', 'City', 'Budget', 'Duration',
+        'Lead Score', 'Source'
+      ]);
+    }
+
+    const rowData = [
+      new Date(), botMode, name, company, phone,
+      service, city, budget, duration,
+      leadScore, 'super-ai-bot'
+    ];
+    botSheet.appendRow(rowData);
+    lock.releaseLock();
+    return _jsonResponse(200, { result: 'success', leadScore, row: rowData });
+  } catch (error) {
+    try { lock.releaseLock(); } catch (_) {}
     return _jsonResponse(500, { result: 'error', error: error.toString() });
   }
 }
 
 // Optional GET to verify deployment
 function doGet(e) {
-  return ContentService.createTextOutput("The web app is active. Ensure you use POST to push data.");
+  return ContentService.createTextOutput('Hamara Brand Apps Script is active. Use POST to push data.');
 }
 
-// ── Helpers ──
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function _sanitize(value, maxLength) {
   if (!value || typeof value !== 'string') return '';
@@ -126,8 +150,6 @@ function _sanitize(value, maxLength) {
 }
 
 function _jsonResponse(statusCode, payload) {
-  // Note: Google Apps Script doPost always returns 200 at the HTTP level,
-  // but we embed the real status in the JSON body for the caller to parse.
   payload.status = statusCode;
   return ContentService
     .createTextOutput(JSON.stringify(payload))

@@ -1504,10 +1504,10 @@
             <div class="hb-chat-header">
                 <div class="hb-chat-avatar">HB</div>
                 <div class="hb-chat-header-info">
-                    <div class="hb-chat-header-name">Hamara Brand AI</div>
+                    <div class="hb-chat-header-name">Hamara Brand Super AI Bot</div>
                     <div class="hb-chat-header-status">
                         <span class="hb-status-dot"></span>
-                        Online · Typically replies instantly
+                        Media Consultant · Strategy Advisor · Sales Closer
                     </div>
                 </div>
                 <button class="hb-chat-close" id="hb-chat-close-btn" aria-label="Close chat">
@@ -1522,10 +1522,10 @@
 
             <!-- Suggested Questions (shown until user types) -->
             <div class="hb-suggestions" id="hb-suggestions">
-                <button class="hb-suggestion-btn" data-q="What media categories do you offer?">All media categories</button>
-                <button class="hb-suggestion-btn" data-q="Which cities do you cover?">City coverage</button>
+                <button class="hb-suggestion-btn" data-q="1">I am a Buyer</button>
+                <button class="hb-suggestion-btn" data-q="2">I am a Partner</button>
+                <button class="hb-suggestion-btn" data-q="What media categories do you offer?">Media categories</button>
                 <button class="hb-suggestion-btn" data-q="How do I book a campaign?">Book a campaign</button>
-                <button class="hb-suggestion-btn" data-q="Tell me about Hamara Brand and Myonventure">About the company</button>
             </div>
 
             <!-- Input Area -->
@@ -1534,7 +1534,7 @@
                     type="text"
                     class="hb-chat-input"
                     id="hb-chat-input"
-                    placeholder="Ask about services, pricing, cities..."
+                    placeholder="Type 1 for Buyer, 2 for Partner, or ask anything..."
                     autocomplete="off"
                     maxlength="500"
                 />
@@ -1545,7 +1545,7 @@
                     </svg>
                 </button>
             </div>
-            <div class="hb-chat-footer">Powered by Hamara Brand AI · hamarabrand.in</div>
+            <div class="hb-chat-footer">Hamara Brand Super AI Bot · Media Consultant + Strategy Advisor</div>
         </div>
     </div>
 
@@ -1556,17 +1556,19 @@
 
         // ── Config ──────────────────────────────────────────────────
         const API_ENDPOINT = '/api/chat';
-        const WELCOME_MSG = `Hello! I am the Hamara Brand AI Assistant, representing Myonventure Pvt. Ltd.\n\nHamara Brand is India's first unified media-tech marketplace. I can assist you with:\n- All media categories: OOH, Transit, Digital, TV, Radio, Cinema, PR and more\n- Pricing, inventory, and city coverage\n- How to plan and book a campaign\n- About the company, clients, and platform\n\nHow can I assist you today?`;
+        const LEAD_BOT_ENDPOINT = '/api/lead-bot';
+        const WELCOME_MSG = `Hello. Welcome to Hamara Brand AI MEDIA Advisor.\nWe help brands, agencies, startups, corporates and growth teams plan and execute advertising across India.\n\nAre you here as:\n1. Buyer - Need advertising, media planning, or growth strategy?\n2. Partner - Want to register as a Media Owner, Agency, or Sales Partner?\n\nType 1 for Buyer or 2 for Partner to begin.`;
 
         // ── State ───────────────────────────────────────────────────
         let isOpen = false;
         let isLoading = false;
         let conversationHistory = []; // [{role:'user'|'bot', content:'...'}]
         let pingRemoved = false;
+        let leadSubmitted = false; // track if we already sent to sheets
         
         // Rate limiting
         let sessionMessageCount = 0;
-        const MAX_SESSION_MESSAGES = 15;
+        const MAX_SESSION_MESSAGES = 40; // higher limit for deep questionnaire
 
         // ── DOM refs ────────────────────────────────────────────────
         const fab         = document.getElementById('hb-chat-fab');
@@ -1667,9 +1669,17 @@
         }
 
         function addBotMessage(text, animate = true) {
-            // Check for platform card trigger token
+            // Check for special tokens
             const showCard = text.includes('[PLATFORM_CARD]');
-            const cleanText = text.replace('[PLATFORM_CARD]', '').trim();
+            const triggerSubmit = text.includes('[SUBMIT_LEAD]');
+
+            // Clean all tokens from displayed text
+            let cleanText = text
+                .replace('[PLATFORM_CARD]', '')
+                .replace('[DATA_COLLECTED] — This tells the system to save your data to our records.', '')
+                .replace('[DATA_COLLECTED] — Your profile data has been submitted.', '')
+                .replace('[SUBMIT_LEAD]', '')
+                .trim();
 
             const wrap = document.createElement('div');
             wrap.className = 'hb-msg hb-bot';
@@ -1689,11 +1699,88 @@
                 cardEl.innerHTML = buildPlatformCard();
                 contentWrap.appendChild(cardEl.firstElementChild);
             }
+            // Show a success badge if lead was submitted
+            if (triggerSubmit && !leadSubmitted) {
+                const badge = document.createElement('div');
+                badge.style.cssText = 'margin-top:8px;background:linear-gradient(135deg,#0B6E4F,#1a9070);color:white;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;max-width:270px;';
+                badge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Your data has been saved. Team will contact you shortly!';
+                contentWrap.appendChild(badge);
+            }
             wrap.appendChild(avatar);
             wrap.appendChild(contentWrap);
             messagesEl.appendChild(wrap);
             scrollBottom();
             conversationHistory.push({ role: 'bot', content: cleanText });
+
+            // Auto-submit lead to Google Sheets
+            if (triggerSubmit && !leadSubmitted) {
+                leadSubmitted = true;
+                submitLeadToSheet();
+            }
+        }
+
+        // ── Extract lead data from conversation history ───────────────
+        function extractLeadData() {
+            const allText = conversationHistory.map(m => m.content).join(' \n ');
+            const userMessages = conversationHistory.filter(m => m.role === 'user').map(m => m.content);
+
+            // Detect bot mode
+            let botMode = 'buyer';
+            const firstUserMsg = (userMessages[0] || '').toLowerCase().trim();
+            if (firstUserMsg === '2' || firstUserMsg.includes('partner') || firstUserMsg.includes('owner') || firstUserMsg.includes('agency')) {
+                botMode = 'partner';
+            }
+
+            // Regex helpers
+            const phoneMatch = allText.match(/(?:^|\s)(\+?91[-\s]?)?([6-9]\d{9})(?:\s|$|,)/m);
+            const emailMatch = allText.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/m);
+            const budgetMatch = allText.match(/(?:₹|Rs\.?)?\s*(\d+[LCK]?[\s–\-]?[\d]*[LCK]?)/i);
+
+            // Extract fields from user messages heuristically
+            // Name: first user message that looks like a name (2-4 words, no numbers)
+            let name = '', company = '', designation = '', phone = '', email = '', city = '', budget = '', service = '', category = '';
+
+            // After bot asks name (step B2/P3), user's next message is likely the name
+            const botMsgs = conversationHistory.filter(m => m.role === 'bot').map(m => m.content);
+            userMessages.forEach((msg, idx) => {
+                const prevBot = botMsgs[idx] || '';
+                const m = msg.trim();
+                if (/full name/i.test(prevBot) || /your name/i.test(prevBot)) name = name || m;
+                if (/company name/i.test(prevBot)) company = company || m;
+                if (/designation/i.test(prevBot) || /role/i.test(prevBot)) designation = designation || m;
+                if (/mobile|phone|whatsapp/i.test(prevBot)) phone = phone || m;
+                if (/email/i.test(prevBot)) email = email || m;
+                if (/city|hq location/i.test(prevBot)) city = city || m;
+                if (/budget/i.test(prevBot)) budget = budget || m;
+                if (/categor|interest|operat/i.test(prevBot)) service = service || m;
+                if (/type of business|what best describes/i.test(prevBot)) category = category || m;
+            });
+
+            // Fallback: regex scan
+            if (!phone && phoneMatch) phone = (phoneMatch[1] || '') + phoneMatch[2];
+            if (!email && emailMatch) email = emailMatch[0];
+            if (!budget && budgetMatch) budget = budgetMatch[0];
+
+            // Collect all user messages as extras
+            const extras = {};
+            userMessages.forEach((m, i) => { extras[`q${i+1}`] = m; });
+
+            return { botMode, name, company, designation, phone, email, city, budget, service, category, extras };
+        }
+
+        // ── Submit lead data to /api/lead-bot → Google Sheets ────────
+        async function submitLeadToSheet() {
+            try {
+                const leadData = extractLeadData();
+                await fetch(LEAD_BOT_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(leadData)
+                });
+                console.log('[HB Bot] Lead submitted to Google Sheets ✓');
+            } catch (err) {
+                console.warn('[HB Bot] Lead submission failed (non-critical):', err);
+            }
         }
 
         function addUserMessage(text) {
@@ -1791,7 +1878,7 @@
             isLoading = val;
             sendBtn.disabled = val;
             inputEl.disabled = val;
-            inputEl.placeholder = val ? 'Thinking...' : 'Ask about services, pricing, cities...';
+            inputEl.placeholder = val ? 'Thinking...' : 'Type your answer or ask anything...';
         }
 
         // ── Input event listeners ────────────────────────────────────
