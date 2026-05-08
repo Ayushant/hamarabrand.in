@@ -220,21 +220,25 @@ Jaipur Office: 601 Royal Town, Raghunath Vihar, Sirsi Road
 /** Sliding-window rate limit: max requests per IP per window */
 const RATE_LIMIT = {
   WINDOW_MS: 60_000,      // 1 minute
-  MAX_REQUESTS: 10,       // 10 requests per window
+  MAX_REQUESTS: 30,       // 30 requests per window — questionnaire needs ~20 turns
   CLEANUP_INTERVAL: 300_000, // purge stale entries every 5 min
 };
 
 /** Guard against oversized payloads */
 const LIMITS = {
   MAX_MESSAGE_LENGTH: 2_000,   // chars per user message
-  MAX_HISTORY_MESSAGES: 20,    // keep last N messages to avoid token overflow
+  MAX_HISTORY_MESSAGES: 8,     // keep last 8 messages — system prompt is large, trim aggressively
   GROQ_TIMEOUT_MS: 25_000,     // 25 s (Vercel function limit is 30 s)
 };
 
 /** Groq model cascade — first available wins */
 const GROQ_MODELS = [
-  "llama-3.3-70b-versatile",
-  "llama-3.1-8b-instant",   // fallback if primary is rate-limited by Groq
+  "llama-3.3-70b-versatile",      // primary: best quality
+  "llama-3.1-70b-versatile",      // fallback 1: slightly older but same size
+  "llama3-70b-8192",              // fallback 2: older 70B
+  "gemma2-9b-it",                 // fallback 3: Google Gemma fast
+  "llama-3.1-8b-instant",         // fallback 4: smallest/fastest
+  "llama3-8b-8192",               // fallback 5: last resort
 ];
 
 /** Allowed origins — tighten this in production */
@@ -434,7 +438,7 @@ export default async function handler(req, res) {
             model,
             messages: groqMessages,
             temperature: 0.7,
-            max_tokens: 800,
+            max_tokens: 600,
             top_p: 0.9,
           }),
         },
@@ -452,8 +456,8 @@ export default async function handler(req, res) {
       const groqMsg = data?.error?.message || "Unknown Groq error";
       console.error(`[chat] Groq error (model: ${model}, status: ${status}):`, groqMsg);
 
-      // 429 from Groq = quota/rate limit — try next model
-      if (status === 429) {
+      // 429/503 from Groq = quota/rate limit — try next model
+      if (status === 429 || status === 503 || status === 500) {
         lastError = groqMsg;
         continue;
       }
