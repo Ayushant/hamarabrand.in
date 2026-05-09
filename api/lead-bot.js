@@ -60,30 +60,12 @@ export default async function handler(req, res) {
   });
 
   try {
-    console.log('[lead-bot] Posting to Google Sheet. Name:', body.name, '| Mode:', body.botMode);
-    console.log('[lead-bot] URL:', GOOGLE_SCRIPT_URL);
+    console.log('[lead-bot] Submitting to Google Sheet. Name:', body.name, '| Mode:', body.botMode);
 
-    // Google Apps Script returns 302 redirect. Default fetch follows it as GET (loses POST body).
-    // Use redirect:'manual' and follow ourselves with POST to preserve the body.
-    let response = await fetch(GOOGLE_SCRIPT_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body:    params.toString(),
-      redirect: 'manual',
-    });
-
-    // Follow the redirect with POST if needed
-    if (response.status === 302 || response.status === 301) {
-      const redirectUrl = response.headers.get('location');
-      console.log('[lead-bot] Following redirect to:', redirectUrl);
-      response = await fetch(redirectUrl, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body:    params.toString(),
-        redirect: 'follow',
-      });
-    }
-
+    // Use GET with query params — most reliable for Google Apps Script Web Apps
+    // (avoids POST→GET redirect issues that lose the body)
+    const url = `${GOOGLE_SCRIPT_URL}?${params.toString()}`;
+    const response = await fetch(url, { redirect: 'follow' });
     const text = await response.text();
     console.log('[lead-bot] Sheet response:', response.status, text.substring(0, 500));
     return res.status(200).json({ result: 'success', sheetStatus: response.status, sheetBody: text.substring(0, 300) });

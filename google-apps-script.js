@@ -100,6 +100,11 @@ function doPost(e) {
   }
 }
 
+/** Handle GET requests — used by lead-bot API to avoid POST redirect issues */
+function doGet(e) {
+  return doPost(e);
+}
+
 function sanitize(val, max) {
   if (!val || typeof val !== 'string') return '';
   return val.trim().substring(0, max);
