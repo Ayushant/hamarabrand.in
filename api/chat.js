@@ -77,14 +77,12 @@ const LIMITS = {
   GROQ_TIMEOUT_MS: 25_000,     // 25 s (Vercel function limit is 30 s)
 };
 
-/** Groq model cascade — first available wins */
+/** Groq model cascade — only currently active models (May 2026) */
 const GROQ_MODELS = [
-  "llama-3.3-70b-versatile",      // primary: best quality
-  "llama-3.1-70b-versatile",      // fallback 1: slightly older but same size
-  "llama3-70b-8192",              // fallback 2: older 70B
-  "gemma2-9b-it",                 // fallback 3: Google Gemma fast
-  "llama-3.1-8b-instant",         // fallback 4: smallest/fastest
-  "llama3-8b-8192",               // fallback 5: last resort
+  "llama-3.3-70b-versatile",                       // production: primary
+  "llama-3.1-8b-instant",                           // production: fast fallback
+  "meta-llama/llama-4-scout-17b-16e-instruct",      // preview: 17B scout
+  "qwen/qwen3-32b",                                 // preview: Qwen 32B
 ];
 
 /** Allowed origins — tighten this in production */
