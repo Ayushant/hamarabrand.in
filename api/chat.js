@@ -32,7 +32,7 @@ B12: "Start when? 1.Within 48hrs 2.This Week 3.This Month 4.Next Quarter"
 B13: "Duration? 1.7 Days 2.15 Days 3.1 Month 4.3 Months 5.Annual"
 B14: "Objective? 1.Lead Gen 2.Branding 3.Product Launch 4.Store Footfall 5.Investor Buzz 6.App Installs 7.Sales Push"
 B15: "Categories? OOH|DOOH|TV|Radio|Events|Digital|Transit|Video|OTT|Influencer|BTL|PR|Print|Cinema|Airport"
-B16: Based on selected categories, ask 1-2 relevant follow-up questions (cities, format, platforms).
+B16: Ask ONE follow-up only: "For [category] - which cities are you targeting?" Do NOT ask sub-questions about formats or platforms.
 B17 CLOSING: Summarize their requirements in 3 lines, then ask: "What next? 1.Proposal in 24hrs 2.Schedule call 3.WhatsApp pricing 4.Free consultation"
 CRITICAL: When user replies to the above question with ANY answer (1, 2, 3, 4, or text), IMMEDIATELY respond with EXACTLY this and nothing else:
 "Thank you! Your requirement has been logged. Our team will contact you shortly.
@@ -81,7 +81,7 @@ const RATE_LIMIT = {
 /** Guard against oversized payloads */
 const LIMITS = {
   MAX_MESSAGE_LENGTH: 2_000,   // chars per user message
-  MAX_HISTORY_MESSAGES: 6,     // keep last 8 messages — system prompt is large, trim aggressively
+  MAX_HISTORY_MESSAGES: 12,     // keep last 8 messages — system prompt is large, trim aggressively
   GROQ_TIMEOUT_MS: 25_000,     // 25 s (Vercel function limit is 30 s)
 };
 
@@ -262,20 +262,32 @@ export default async function handler(req, res) {
   }
 
   // ── Conversation History Cap (prevent token overflow) ──
-  // Always keep FIRST 2 messages (mode-selection context: welcome + user's "1"/"2")
-  // PLUS the most recent N messages. This prevents the bot forgetting Buyer/Partner mode.
+  // Strategy: always include the mode-selection exchange (user's first "1" or "2" reply
+  // and the bot's confirmation), then the last N recent messages.
   let cappedMessages;
   if (messages.length <= LIMITS.MAX_HISTORY_MESSAGES) {
     cappedMessages = messages;
   } else {
-    const firstTwo = messages.slice(0, 2);
-    const lastN    = messages.slice(-( LIMITS.MAX_HISTORY_MESSAGES - 2));
-    // Deduplicate in case firstTwo overlaps with lastN
-    const seen = new Set(firstTwo.map((_, i) => i));
-    const startIdx = messages.length - (LIMITS.MAX_HISTORY_MESSAGES - 2);
-    cappedMessages = startIdx <= 2
+    // Find the index where user first typed "1" or "2" to select Buyer/Partner mode
+    // This is typically index 0 or 2 depending on whether they opened with a greeting
+    let modeIdx = -1;
+    for (let i = 0; i < Math.min(6, messages.length); i++) {
+      const m = messages[i];
+      if (m.role === 'user' && /^[12]$/.test(m.content.trim())) {
+        modeIdx = i;
+        break;
+      }
+    }
+    const anchor = modeIdx >= 0
+      ? messages.slice(modeIdx, modeIdx + 2)  // user "1"/"2" + bot confirmation
+      : messages.slice(0, 2);                 // fallback: first 2
+    const lastN = messages.slice(-(LIMITS.MAX_HISTORY_MESSAGES - anchor.length));
+    // Merge, removing any overlap
+    const anchorEnd = modeIdx >= 0 ? modeIdx + 2 : 2;
+    const lastStart = messages.length - (LIMITS.MAX_HISTORY_MESSAGES - anchor.length);
+    cappedMessages = anchorEnd >= lastStart
       ? messages.slice(-LIMITS.MAX_HISTORY_MESSAGES)
-      : [...firstTwo, ...lastN];
+      : [...anchor, ...lastN];
   }
 
   const groqMessages = [
