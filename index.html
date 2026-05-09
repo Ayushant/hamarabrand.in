@@ -1687,10 +1687,11 @@
 
             // 1. Detect Options: Look for "1. Option A 2. Option B"
             const options = [];
-            const optionRegex = /(?:\d+\.\s+)([^\d\n]+)(?=\d+\.|$)/g;
+            // Improved regex: looks for "Number. " followed by text until the next "Number. " or end of line/string
+            const optionRegex = /(\d+\.\s+)(.*?)(?=\s+\d+\.\s+|$)/g;
             let match;
             while ((match = optionRegex.exec(text)) !== null) {
-                options.push(match[1].trim());
+                options.push(match[2].trim());
             }
 
             // Clean tokens and numbered options from displayed text (optional - we can keep numbers in bubble)
