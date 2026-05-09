@@ -1311,18 +1311,31 @@
         .hb-msg.hb-user .hb-msg-bubble a { color: rgba(255,255,255,0.85); }
 
         /* Typing indicator */
-        .hb-typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
-        .hb-typing span {
-            width: 7px; height: 7px;
-            background: #0B6E4F;
-            border-radius: 50%;
-            animation: hb-bounce 1.2s ease-in-out infinite;
+        .hb-typing { display: flex; gap: 4px; padding: 4px 0; }
+        .hb-typing span { width: 6px; height: 6px; background: #999; border-radius: 50%; animation: hb-bounce 1.4s infinite ease-in-out both; }
+        .hb-typing span:nth-child(1) { animation-delay: -0.32s; }
+        .hb-typing span:nth-child(2) { animation-delay: -0.16s; }
+
+        /* Bot Options Buttons */
+        .hb-bot-options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; padding-left: 0; }
+        .hb-option-btn {
+            background: white;
+            border: 1.5px solid #0B6E4F;
+            color: #0B6E4F;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .hb-typing span:nth-child(2) { animation-delay: 0.2s; }
-        .hb-typing span:nth-child(3) { animation-delay: 0.4s; }
+        .hb-option-btn:hover { background: #0B6E4F; color: white; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(11,110,79,0.2); }
+        .hb-option-btn:active { transform: translateY(0); }
+
         @keyframes hb-bounce {
-            0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
-            40% { transform: translateY(-6px); opacity: 1; }
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
         }
 
         /* Suggested questions */
@@ -1669,11 +1682,18 @@
         }
 
         function addBotMessage(text, animate = true) {
-            // Check for special tokens
             const showCard = text.includes('[PLATFORM_CARD]');
             const triggerSubmit = text.includes('[SUBMIT_LEAD]');
 
-            // Clean all tokens from displayed text
+            // 1. Detect Options: Look for "1. Option A 2. Option B"
+            const options = [];
+            const optionRegex = /(?:\d+\.\s+)([^\d\n]+)(?=\d+\.|$)/g;
+            let match;
+            while ((match = optionRegex.exec(text)) !== null) {
+                options.push(match[1].trim());
+            }
+
+            // Clean tokens and numbered options from displayed text (optional - we can keep numbers in bubble)
             let cleanText = text
                 .replace('[PLATFORM_CARD]', '')
                 .replace('[DATA_COLLECTED] — This tells the system to save your data to our records.', '')
@@ -1694,12 +1714,32 @@
             bubble.className = 'hb-msg-bubble';
             bubble.innerHTML = formatText(cleanText);
             contentWrap.appendChild(bubble);
+
+            // 2. Add buttons if options found
+            if (options.length > 0) {
+                const optWrap = document.createElement('div');
+                optWrap.className = 'hb-bot-options';
+                options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'hb-option-btn';
+                    btn.textContent = opt;
+                    btn.onclick = () => {
+                        // When clicked, send the number or the text
+                        // Most LLMs prefer the number if options are numbered
+                        sendMessage(`${idx + 1}`);
+                        optWrap.style.pointerEvents = 'none';
+                        optWrap.style.opacity = '0.6';
+                    };
+                    optWrap.appendChild(btn);
+                });
+                contentWrap.appendChild(optWrap);
+            }
+
             if (showCard) {
                 const cardEl = document.createElement('div');
                 cardEl.innerHTML = buildPlatformCard();
                 contentWrap.appendChild(cardEl.firstElementChild);
             }
-            // Show a success badge if lead was submitted
             if (triggerSubmit && !leadSubmitted) {
                 const badge = document.createElement('div');
                 badge.style.cssText = 'margin-top:8px;background:linear-gradient(135deg,#0B6E4F,#1a9070);color:white;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;max-width:270px;';
@@ -1712,7 +1752,6 @@
             scrollBottom();
             conversationHistory.push({ role: 'bot', content: cleanText });
 
-            // Auto-submit lead to Google Sheets
             if (triggerSubmit && !leadSubmitted) {
                 leadSubmitted = true;
                 submitLeadToSheet();
@@ -1850,8 +1889,36 @@
 
         // ── Send message ─────────────────────────────────────────────
         async function sendMessage(text) {
-            const msg = text || inputEl.value.trim();
+            const msg = (text || inputEl.value).trim();
             if (!msg || isLoading) return;
+
+            // ── Input Validation ──
+            const lastBotMsg = (conversationHistory.filter(m => m.role === 'bot').pop() || {}).content || '';
+            
+            // Email Validation
+            if (/email/i.test(lastBotMsg)) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(msg)) {
+                    inputEl.style.border = '1px solid #ff4d4d';
+                    inputEl.placeholder = 'Please enter a valid email...';
+                    if (!text) inputEl.value = ''; // clear if typed
+                    return;
+                }
+            }
+
+            // Phone Validation
+            if (/mobile|phone|whatsapp/i.test(lastBotMsg)) {
+                const phoneDigits = msg.replace(/\D/g, '');
+                if (phoneDigits.length < 10) {
+                    inputEl.style.border = '1px solid #ff4d4d';
+                    inputEl.placeholder = 'Enter 10-digit number...';
+                    if (!text) inputEl.value = '';
+                    return;
+                }
+            }
+
+            // Reset styles on success
+            inputEl.style.border = 'none';
 
             if (sessionMessageCount >= MAX_SESSION_MESSAGES) {
                 inputEl.value = '';
