@@ -34,8 +34,12 @@ B14: "Objective? 1.Lead Gen 2.Branding 3.Product Launch 4.Store Footfall 5.Inves
 B15: "Categories? OOH|DOOH|TV|Radio|Events|Digital|Transit|Video|OTT|Influencer|BTL|PR|Print|Cinema|Airport"
 B16: Based on selected categories, ask 1-2 relevant follow-up questions (cities, format, platforms).
 B17 CLOSING: Summarize their requirements in 3 lines, then ask: "What next? 1.Proposal in 24hrs 2.Schedule call 3.WhatsApp pricing 4.Free consultation"
-After choice: "Your requirement is logged. Team will contact you shortly. Phone: +91-9571115669 | Email: support@hamarabrand.com | Web: www.hamarabrand.in [DATA_COLLECTED]"
-Then append: [SUBMIT_LEAD]
+CRITICAL: When user replies to the above question with ANY answer (1, 2, 3, 4, or text), IMMEDIATELY respond with EXACTLY this and nothing else:
+"Thank you! Your requirement has been logged. Our team will contact you shortly.
+Phone: +91-9571115669 | Email: support@hamarabrand.com | Web: www.hamarabrand.in
+[DATA_COLLECTED]"
+Then on a NEW LINE append exactly: [SUBMIT_LEAD]
+Do NOT show the welcome message again. Do NOT ask more questions. The conversation is COMPLETE.
 
 == MODE 2: PARTNER ==
 Ask ONE question at a time:
@@ -45,8 +49,12 @@ P3: "Full name?" P4: "Company?" P5: "Designation?" P6: "Mobile?" P7: "Email?" P8
 P10: Ask 2-3 relevant questions based on their business type and category (inventory size, cities, authorization).
 P11: "Minimum campaign size? Payment terms?"
 P12: "Have rate cards or client references? (Yes/No)"
-P13 CLOSING: Summarize profile in 2 lines. "Your profile is being registered. Phone: +91-9571115669 | Email: support@hamarabrand.com [DATA_COLLECTED]"
-Then append: [SUBMIT_LEAD]
+P13 CLOSING: Summarize profile in 2 lines, then respond with EXACTLY:
+"Thank you! Your profile has been registered. Our team will contact you shortly.
+Phone: +91-9571115669 | Email: support@hamarabrand.com
+[DATA_COLLECTED]"
+Then on a NEW LINE append exactly: [SUBMIT_LEAD]
+Do NOT show the welcome message again. The conversation is COMPLETE.
 
 == RULES ==
 - ONE question at a time always.
@@ -254,8 +262,21 @@ export default async function handler(req, res) {
   }
 
   // ── Conversation History Cap (prevent token overflow) ──
-  // Keep the most recent N messages so we don't exceed model context limits.
-  const cappedMessages = messages.slice(-LIMITS.MAX_HISTORY_MESSAGES);
+  // Always keep FIRST 2 messages (mode-selection context: welcome + user's "1"/"2")
+  // PLUS the most recent N messages. This prevents the bot forgetting Buyer/Partner mode.
+  let cappedMessages;
+  if (messages.length <= LIMITS.MAX_HISTORY_MESSAGES) {
+    cappedMessages = messages;
+  } else {
+    const firstTwo = messages.slice(0, 2);
+    const lastN    = messages.slice(-( LIMITS.MAX_HISTORY_MESSAGES - 2));
+    // Deduplicate in case firstTwo overlaps with lastN
+    const seen = new Set(firstTwo.map((_, i) => i));
+    const startIdx = messages.length - (LIMITS.MAX_HISTORY_MESSAGES - 2);
+    cappedMessages = startIdx <= 2
+      ? messages.slice(-LIMITS.MAX_HISTORY_MESSAGES)
+      : [...firstTwo, ...lastN];
+  }
 
   const groqMessages = [
     { role: "system", content: SYSTEM_PROMPT },

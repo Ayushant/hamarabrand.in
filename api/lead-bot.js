@@ -91,17 +91,19 @@ export default async function handler(req, res) {
   params.append('_token',   SECRET_TOKEN);
 
   try {
+    console.log('[lead-bot] Submitting to:', GOOGLE_SCRIPT_URL);
+    console.log('[lead-bot] Params:', params.toString());
     const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: params.toString(),
     });
-
-    // Apps Script always returns 200, response is opaque anyway
-    return res.status(200).json({ result: 'success', message: 'Lead submitted to Google Sheets.' });
+    const responseText = await response.text();
+    console.log('[lead-bot] Google Script response status:', response.status, 'body:', responseText);
+    return res.status(200).json({ result: 'success', message: 'Lead submitted to Google Sheets.', sheetStatus: response.status });
   } catch (err) {
-    console.error('[lead-bot] Google Sheets submission error:', err);
+    console.error('[lead-bot] Google Sheets submission error:', err.message || err);
     // Still return 200 to bot — don't fail user experience
-    return res.status(200).json({ result: 'queued', message: 'Lead logged.' });
+    return res.status(200).json({ result: 'error', message: err.message || 'Submission failed.' });
   }
 }
