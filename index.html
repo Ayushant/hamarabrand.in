@@ -1685,13 +1685,16 @@
             const showCard = text.includes('[PLATFORM_CARD]');
             const triggerSubmit = text.includes('[SUBMIT_LEAD]');
 
-            // 1. Detect Options: Look for "1. Option A 2. Option B"
+            // 1. Detect Options: Split by "Number. " pattern
             const options = [];
-            // Improved regex: looks for "Number. " followed by text until the next "Number. " or end of line/string
-            const optionRegex = /(\d+\.\s+)(.*?)(?=\s+\d+\.\s+|$)/g;
-            let match;
-            while ((match = optionRegex.exec(text)) !== null) {
-                options.push(match[2].trim());
+            const parts = text.split(/\d+\.\s+/);
+            if (parts.length > 1) {
+                // index 0 is the text before the first option
+                // indices 1 to n are the actual options
+                for (let i = 1; i < parts.length; i++) {
+                    const opt = parts[i].trim();
+                    if (opt) options.push(opt);
+                }
             }
 
             // Clean tokens and numbered options from displayed text (optional - we can keep numbers in bubble)
