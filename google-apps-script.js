@@ -47,14 +47,7 @@ function setup() {
 }
 
 function doPost(e) {
-
   try {
-    // ── Auth ──
-    const token = (e.parameter._token || '').trim();
-    if (token !== SECRET) {
-      return jsonResp(403, { result: 'error', error: 'Forbidden' });
-    }
-
     const p = e.parameter;
 
     // ── Get or create BotLeads tab ──
