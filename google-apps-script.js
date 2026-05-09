@@ -25,7 +25,29 @@ const HEADERS = [
   'City', 'Budget', 'Service/Category', 'Goal/Objective', 'Source', 'Lead Score'
 ];
 
+/** Run this ONCE manually from Apps Script editor to create the sheet + headers */
+function setup() {
+  const ss    = SpreadsheetApp.getActiveSpreadsheet();
+  let   sheet = ss.getSheetByName(TAB_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(TAB_NAME);
+  }
+  // Write headers
+  sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+  // Style header row
+  sheet.getRange(1, 1, 1, HEADERS.length)
+       .setFontWeight('bold')
+       .setBackground('#1a4d2e')
+       .setFontColor('#ffffff')
+       .setFontSize(11);
+  sheet.setFrozenRows(1);
+  // Auto-resize columns
+  for (let i = 1; i <= HEADERS.length; i++) sheet.autoResizeColumn(i);
+  SpreadsheetApp.getUi().alert('BotLeads tab created with all columns!');
+}
+
 function doPost(e) {
+
   try {
     // ── Auth ──
     const token = (e.parameter._token || '').trim();
