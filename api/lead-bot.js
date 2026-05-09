@@ -1,10 +1,8 @@
 // Vercel Serverless Function — Hamara Brand Super AI Bot Lead Submission
-// Receives structured lead data collected by the bot and forwards to Google Sheets
+// Receives structured lead data from the chatbot and forwards to the dedicated Google Sheet.
 
-const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL ||
-  'https://script.google.com/macros/s/AKfycby2SuumH1jsCbaJzBk8Q543hBtLmQWgVxj8OMahdMlCtQLuGHJW4kvX_o6TXVD6oHFc/exec';
-
-const SECRET_TOKEN = process.env.GOOGLE_SCRIPT_SECRET || 'hb-lead-secret-2026-change-me';
+const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL || '';
+const SECRET_TOKEN      = process.env.GOOGLE_SCRIPT_SECRET || 'hb-lead-secret-2026-change-me';
 
 const ALLOWED_ORIGINS = [
   "https://hamarabrand.in",
@@ -15,15 +13,15 @@ const ALLOWED_ORIGINS = [
 
 function setCorsHeaders(req, res) {
   const origin = req.headers.origin || "";
-  const isDev = !origin || origin.startsWith("http://localhost") || origin.startsWith("http://127.0.0.1");
+  const isDev  = !origin || origin.startsWith("http://localhost") || origin.startsWith("http://127.0.0.1");
   const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-  res.setHeader("Access-Control-Allow-Origin", isDev ? "*" : allowed);
+  res.setHeader("Access-Control-Allow-Origin",  isDev ? "*" : allowed);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Vary", "Origin");
 }
 
-function sanitize(val, max = 500) {
+function sanitize(val, max = 300) {
   if (!val || typeof val !== 'string') return '';
   return val.trim().substring(0, max);
 }
@@ -32,78 +30,47 @@ export default async function handler(req, res) {
   setCorsHeaders(req, res);
 
   if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
 
   const body = req.body || {};
 
-  // Build a flat submission from whatever fields the bot collected
-  const leadData = {
-    // Core identity
-    name:        sanitize(body.name),
-    company:     sanitize(body.company),
-    designation: sanitize(body.designation),
-    phone:       sanitize(body.phone, 20),
-    email:       sanitize(body.email, 200),
-    website:     sanitize(body.website, 300),
-    industry:    sanitize(body.industry),
-
-    // Intent
-    botMode:     sanitize(body.botMode),    // 'buyer' | 'partner'
-    service:     sanitize(body.service, 500),
-    city:        sanitize(body.city, 300),
-    budget:      sanitize(body.budget),
-    duration:    sanitize(body.duration),
-    objective:   sanitize(body.objective, 500),
-    timeline:    sanitize(body.timeline),
-    decisionMaker: sanitize(body.decisionMaker),
-
-    // Partner-specific
-    partnerType: sanitize(body.partnerType),
-    category:    sanitize(body.category, 500),
-
-    // Scoring
-    leadScore:   sanitize(body.leadScore),
-
-    // Extra collected answers (all as JSON string)
-    extras:      sanitize(JSON.stringify(body.extras || {}), 2000),
-
-    source: 'super-ai-bot',
-    _token: SECRET_TOKEN,
-  };
-
-  // Require at minimum phone or email
-  if (!leadData.phone && !leadData.email && !leadData.name) {
-    return res.status(400).json({ error: 'Insufficient lead data.' });
+  // Require at minimum a name or phone
+  if (!sanitize(body.name) && !sanitize(body.phone)) {
+    return res.status(400).json({ error: 'Insufficient lead data — name or phone required.' });
   }
 
-  // Build URLSearchParams
-  const params = new URLSearchParams();
-  // Map to the columns the existing Apps Script expects:
-  // Timestamp | Name | Company | Phone | Service | City | Budget | Duration | Source
-  params.append('name',     leadData.name || 'Bot Lead');
-  params.append('company',  leadData.company || '');
-  params.append('phone',    leadData.phone || leadData.email || '');
-  params.append('service',  [leadData.botMode, leadData.service, leadData.category, leadData.objective].filter(Boolean).join(' | ').substring(0, 200));
-  params.append('city',     leadData.city || '');
-  params.append('budget',   leadData.budget || '');
-  params.append('duration', leadData.duration || '');
-  params.append('source',   leadData.source);
-  params.append('_token',   SECRET_TOKEN);
+  if (!GOOGLE_SCRIPT_URL) {
+    console.error('[lead-bot] GOOGLE_SCRIPT_URL env var not set.');
+    return res.status(200).json({ result: 'error', message: 'Sheet URL not configured.' });
+  }
+
+  // Map to the Apps Script columns:
+  // Timestamp | Mode | Name | Company | Phone | Email | City | Budget | Service | Goal | Source | LeadScore
+  const params = new URLSearchParams({
+    _token:   SECRET_TOKEN,
+    botMode:  sanitize(body.botMode || 'buyer', 20),
+    name:     sanitize(body.name, 120),
+    company:  sanitize(body.company, 120),
+    phone:    sanitize(body.phone, 20),
+    email:    sanitize(body.email, 200),
+    city:     sanitize(body.city, 100),
+    budget:   sanitize(body.budget, 100),
+    service:  sanitize(body.service || body.category, 200),
+    objective: sanitize(body.objective || body.goal, 200),
+  });
 
   try {
-    console.log('[lead-bot] Submitting to:', GOOGLE_SCRIPT_URL);
-    console.log('[lead-bot] Params:', params.toString());
+    console.log('[lead-bot] Posting to Google Sheet. Name:', body.name, '| Mode:', body.botMode);
     const response = await fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString(),
+      body:    params.toString(),
     });
-    const responseText = await response.text();
-    console.log('[lead-bot] Google Script response status:', response.status, 'body:', responseText);
-    return res.status(200).json({ result: 'success', message: 'Lead submitted to Google Sheets.', sheetStatus: response.status });
+    const text = await response.text();
+    console.log('[lead-bot] Sheet response:', response.status, text);
+    return res.status(200).json({ result: 'success', sheetStatus: response.status });
   } catch (err) {
-    console.error('[lead-bot] Google Sheets submission error:', err.message || err);
-    // Still return 200 to bot — don't fail user experience
-    return res.status(200).json({ result: 'error', message: err.message || 'Submission failed.' });
+    console.error('[lead-bot] Submission error:', err.message || err);
+    return res.status(200).json({ result: 'error', message: err.message });
   }
 }
