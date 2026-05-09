@@ -1739,7 +1739,7 @@
 
             // ── Global email scan ──
             const emailMatch = allUserText.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
-            const email = emailMatch ? emailMatch[0] : '';
+            let email = emailMatch ? emailMatch[0] : '';
 
             // ── Fields extracted by question context ──
             let name = '', company = '', designation = '', city = '', budget = '', service = '', category = '', duration = '', objective = '';
