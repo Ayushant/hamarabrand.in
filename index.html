@@ -1797,14 +1797,16 @@
         async function submitLeadToSheet() {
             try {
                 const leadData = extractLeadData();
-                await fetch(LEAD_BOT_ENDPOINT, {
+                console.log('[HB Bot] Submitting lead data:', JSON.stringify(leadData));
+                const resp = await fetch(LEAD_BOT_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(leadData)
                 });
-                console.log('[HB Bot] Lead submitted to Google Sheets ✓');
+                const result = await resp.json();
+                console.log('[HB Bot] Server response:', resp.status, JSON.stringify(result));
             } catch (err) {
-                console.warn('[HB Bot] Lead submission failed (non-critical):', err);
+                console.warn('[HB Bot] Lead submission failed:', err);
             }
         }
 
