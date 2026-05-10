@@ -1899,28 +1899,35 @@
             // ── Input Validation ──
             const lastBotMsg = (conversationHistory.filter(m => m.role === 'bot').pop() || {}).content || '';
             
-            // Find positions of all possible question types
-            const emailIdx = lastBotMsg.toLowerCase().lastIndexOf('email');
+            // Isolate the "active" part of the message (the last question or the last sentence)
+            const sentences = lastBotMsg.match(/[^.!?\n]+[.!?\n]?/g) || [lastBotMsg];
+            const questionSentences = sentences.filter(s => s.includes('?'));
+            const activePart = (questionSentences.length > 0 
+                ? questionSentences[questionSentences.length - 1] 
+                : sentences[sentences.length - 1]).toLowerCase();
+
+            // Find positions of all possible question types within the active part ONLY
+            const emailIdx = activePart.lastIndexOf('email');
             const phoneIdx = Math.max(
-                lastBotMsg.toLowerCase().lastIndexOf('mobile'),
-                lastBotMsg.toLowerCase().lastIndexOf('phone'),
-                lastBotMsg.toLowerCase().lastIndexOf('whatsapp')
+                activePart.lastIndexOf('mobile'),
+                activePart.lastIndexOf('phone'),
+                activePart.lastIndexOf('whatsapp')
             );
             const otherIdx = Math.max(
-                lastBotMsg.toLowerCase().lastIndexOf('city'),
-                lastBotMsg.toLowerCase().lastIndexOf('location'),
-                lastBotMsg.toLowerCase().lastIndexOf('name'),
-                lastBotMsg.toLowerCase().lastIndexOf('company'),
-                lastBotMsg.toLowerCase().lastIndexOf('budget'),
-                lastBotMsg.toLowerCase().lastIndexOf('goal'),
-                lastBotMsg.toLowerCase().lastIndexOf('start'),
-                lastBotMsg.toLowerCase().lastIndexOf('advertising'),
-                lastBotMsg.toLowerCase().lastIndexOf('category'),
-                lastBotMsg.toLowerCase().lastIndexOf('describe'),
-                lastBotMsg.toLowerCase().lastIndexOf('operate')
+                activePart.lastIndexOf('city'),
+                activePart.lastIndexOf('location'),
+                activePart.lastIndexOf('name'),
+                activePart.lastIndexOf('company'),
+                activePart.lastIndexOf('budget'),
+                activePart.lastIndexOf('goal'),
+                activePart.lastIndexOf('start'),
+                activePart.lastIndexOf('advertising'),
+                activePart.lastIndexOf('category'),
+                activePart.lastIndexOf('describe'),
+                activePart.lastIndexOf('operate')
             );
 
-            // Determine the "active" question by which keyword appeared last
+            // Determine the "active" question keyword
             const maxIdx = Math.max(emailIdx, phoneIdx, otherIdx);
 
             if (maxIdx !== -1 && maxIdx === emailIdx) {
