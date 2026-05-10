@@ -1898,45 +1898,51 @@
 
             // ── Input Validation ──
             const lastBotMsg = (conversationHistory.filter(m => m.role === 'bot').pop() || {}).content || '';
-            const isEmailPrompt = /email/i.test(lastBotMsg);
-            const isPhonePrompt = /mobile|phone|whatsapp/i.test(lastBotMsg);
+            
+            // Find positions of all possible question types
+            const emailIdx = lastBotMsg.toLowerCase().lastIndexOf('email');
+            const phoneIdx = Math.max(
+                lastBotMsg.toLowerCase().lastIndexOf('mobile'),
+                lastBotMsg.toLowerCase().lastIndexOf('phone'),
+                lastBotMsg.toLowerCase().lastIndexOf('whatsapp')
+            );
+            const otherIdx = Math.max(
+                lastBotMsg.toLowerCase().lastIndexOf('city'),
+                lastBotMsg.toLowerCase().lastIndexOf('location'),
+                lastBotMsg.toLowerCase().lastIndexOf('name'),
+                lastBotMsg.toLowerCase().lastIndexOf('company'),
+                lastBotMsg.toLowerCase().lastIndexOf('budget'),
+                lastBotMsg.toLowerCase().lastIndexOf('goal'),
+                lastBotMsg.toLowerCase().lastIndexOf('start'),
+                lastBotMsg.toLowerCase().lastIndexOf('advertising'),
+                lastBotMsg.toLowerCase().lastIndexOf('category'),
+                lastBotMsg.toLowerCase().lastIndexOf('describe'),
+                lastBotMsg.toLowerCase().lastIndexOf('operate')
+            );
 
-            if (isEmailPrompt && isPhonePrompt) {
-                // If both are mentioned, allow either a valid email OR a valid phone
+            // Determine the "active" question by which keyword appeared last
+            const maxIdx = Math.max(emailIdx, phoneIdx, otherIdx);
+
+            if (maxIdx !== -1 && maxIdx === emailIdx) {
+                // Email is the active question
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                const phoneDigits = msg.replace(/\D/g, '');
                 const isValidEmail = emailRegex.test(msg);
-                const isValidPhone = phoneDigits.length >= 10;
+                // Fallback: if phone was also mentioned, allow valid phone
+                const isValidPhone = (phoneIdx !== -1) && (msg.replace(/\D/g, '').length >= 10);
                 
                 if (!isValidEmail && !isValidPhone) {
-                    inputEl.style.border = '1.5px solid #ff4d4d';
-                    // Determine which one was likely the intended question based on position
-                    const lastEmailIdx = lastBotMsg.toLowerCase().lastIndexOf('email');
-                    const lastPhoneIdx = Math.max(
-                        lastBotMsg.toLowerCase().lastIndexOf('mobile'),
-                        lastBotMsg.toLowerCase().lastIndexOf('phone'),
-                        lastBotMsg.toLowerCase().lastIndexOf('whatsapp')
-                    );
-                    
-                    if (lastEmailIdx > lastPhoneIdx) {
-                        inputEl.placeholder = 'Please enter a valid email...';
-                    } else {
-                        inputEl.placeholder = 'Enter 10-digit number...';
-                    }
-                    if (!text) inputEl.value = '';
-                    return;
-                }
-            } else if (isEmailPrompt) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(msg)) {
                     inputEl.style.border = '1.5px solid #ff4d4d';
                     inputEl.placeholder = 'Please enter a valid email...';
                     if (!text) inputEl.value = '';
                     return;
                 }
-            } else if (isPhonePrompt) {
-                const phoneDigits = msg.replace(/\D/g, '');
-                if (phoneDigits.length < 10) {
+            } else if (maxIdx !== -1 && maxIdx === phoneIdx) {
+                // Phone is the active question
+                const isValidPhone = msg.replace(/\D/g, '').length >= 10;
+                // Fallback: if email was also mentioned, allow valid email
+                const isValidEmail = (emailIdx !== -1) && (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(msg));
+                
+                if (!isValidPhone && !isValidEmail) {
                     inputEl.style.border = '1.5px solid #ff4d4d';
                     inputEl.placeholder = 'Enter 10-digit number...';
                     if (!text) inputEl.value = '';
