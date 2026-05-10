@@ -1898,23 +1898,46 @@
 
             // ── Input Validation ──
             const lastBotMsg = (conversationHistory.filter(m => m.role === 'bot').pop() || {}).content || '';
-            
-            // Email Validation
-            if (/email/i.test(lastBotMsg)) {
+            const isEmailPrompt = /email/i.test(lastBotMsg);
+            const isPhonePrompt = /mobile|phone|whatsapp/i.test(lastBotMsg);
+
+            if (isEmailPrompt && isPhonePrompt) {
+                // If both are mentioned, allow either a valid email OR a valid phone
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(msg)) {
-                    inputEl.style.border = '1px solid #ff4d4d';
-                    inputEl.placeholder = 'Please enter a valid email...';
-                    if (!text) inputEl.value = ''; // clear if typed
+                const phoneDigits = msg.replace(/\D/g, '');
+                const isValidEmail = emailRegex.test(msg);
+                const isValidPhone = phoneDigits.length >= 10;
+                
+                if (!isValidEmail && !isValidPhone) {
+                    inputEl.style.border = '1.5px solid #ff4d4d';
+                    // Determine which one was likely the intended question based on position
+                    const lastEmailIdx = lastBotMsg.toLowerCase().lastIndexOf('email');
+                    const lastPhoneIdx = Math.max(
+                        lastBotMsg.toLowerCase().lastIndexOf('mobile'),
+                        lastBotMsg.toLowerCase().lastIndexOf('phone'),
+                        lastBotMsg.toLowerCase().lastIndexOf('whatsapp')
+                    );
+                    
+                    if (lastEmailIdx > lastPhoneIdx) {
+                        inputEl.placeholder = 'Please enter a valid email...';
+                    } else {
+                        inputEl.placeholder = 'Enter 10-digit number...';
+                    }
+                    if (!text) inputEl.value = '';
                     return;
                 }
-            }
-
-            // Phone Validation
-            if (/mobile|phone|whatsapp/i.test(lastBotMsg)) {
+            } else if (isEmailPrompt) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(msg)) {
+                    inputEl.style.border = '1.5px solid #ff4d4d';
+                    inputEl.placeholder = 'Please enter a valid email...';
+                    if (!text) inputEl.value = '';
+                    return;
+                }
+            } else if (isPhonePrompt) {
                 const phoneDigits = msg.replace(/\D/g, '');
                 if (phoneDigits.length < 10) {
-                    inputEl.style.border = '1px solid #ff4d4d';
+                    inputEl.style.border = '1.5px solid #ff4d4d';
                     inputEl.placeholder = 'Enter 10-digit number...';
                     if (!text) inputEl.value = '';
                     return;
@@ -1922,7 +1945,7 @@
             }
 
             // Reset styles on success
-            inputEl.style.border = 'none';
+            inputEl.style.border = '';
 
             if (sessionMessageCount >= MAX_SESSION_MESSAGES) {
                 inputEl.value = '';
