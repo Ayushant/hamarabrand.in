@@ -3,7 +3,6 @@
   "devCommand": "",
   "installCommand": "",
   "framework": null,
-  "public": true,
   "cleanUrls": true,
   "trailingSlash": false,
   "functions": {
