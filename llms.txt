@@ -6,5 +6,15 @@ Description: India's No.1 Enterprise Transit Media Marketplace. Book advertising
 
 URLs:
 - https://hamarabrand.in/
+- https://hamarabrand.in/blog
+- https://hamarabrand.in/seo
+- https://hamarabrand.in/keywords
+- https://hamarabrand.in/blog/transit-media-advertising-trends-2026
+- https://hamarabrand.in/blog/bus-advertising-cost-in-india
+- https://hamarabrand.in/blog/auto-rickshaw-branding-for-local-businesses
+- https://hamarabrand.in/seo/transit-media-advertising
+- https://hamarabrand.in/seo/bus-advertising
+- https://hamarabrand.in/seo/auto-rickshaw-branding
+- https://hamarabrand.in/seo/cab-branding
 - https://hamarabrand.in/sitemap.xml
 - https://hamarabrand.in/robots.txt
