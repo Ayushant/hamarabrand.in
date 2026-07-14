@@ -28,6 +28,14 @@
     {
       "source": "/api/lead-bot",
       "destination": "/api/lead-bot.js"
+    },
+    {
+      "source": "/api/admin-leads",
+      "destination": "/api/admin-leads.js"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
     }
   ],
   "headers": [

@@ -251,8 +251,14 @@
                                 <select id="media-type-select"
                                     class="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm appearance-none">
                                     <option>Select Media Asset</option>
+                                    <option>OOH Category</option>
+                                    <option>DOOH Category</option>
                                     <option>Bus Side Panels</option>
                                     <option>Metro Wraps</option>
+                                    <option>Bus Branding</option>
+                                    <option>Metro Branding</option>
+                                    <option>Cab Branding</option>
+                                    <option>Auto Rickshaw Branding</option>
                                     <option>Airport Digital</option>
                                 </select>
                             </div>
@@ -967,7 +973,7 @@
         });
 
         // ── Lead Form Submission — direct to Google Apps Script ──
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2SuumH1jsCbaJzBk8Q543hBtLmQWgVxj8OMahdMlCtQLuGHJW4kvX_o6TXVD6oHFc/exec';
+        const LEAD_BOT_ENDPOINT = '/api/lead-bot';
 
         document.getElementById('lead-gen-modal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -999,24 +1005,23 @@
             submitBtn.innerText = 'Submitting...';
             submitBtn.disabled = true;
 
-            const params = new URLSearchParams({
+            const payload = {
+                botMode: 'buyer',
                 name: nameInput,
                 company: form.querySelector('[name="company"]').value.trim(),
                 phone: phoneInput,
-                service: form.querySelector('[name="service"]').value.trim(),
+                email: form.querySelector('[name="email"]').value.trim(),
                 city: form.querySelector('[name="city"]').value.trim(),
                 budget: form.querySelector('[name="budget"]').value,
-                duration: form.querySelector('[name="duration"]').value.trim(),
-                source: "website-direct",
-                _token: "hb-lead-secret-2026-change-me" // Required if you are using the new hardened Apps Script
-            });
+                service: form.querySelector('[name="service"]').value.trim(),
+                objective: form.querySelector('[name="duration"]').value.trim(),
+                source: 'website-direct'
+            };
 
-            // Send directly to Google Apps Script (no-cors = no CORS errors)
-            fetch(GOOGLE_SCRIPT_URL, {
+            fetch(LEAD_BOT_ENDPOINT, {
                 method: 'POST',
-                mode: 'no-cors',
-                body: params,
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             })
             .then(() => {
                 submitBtn.innerText = 'Thank You!';
@@ -1031,7 +1036,7 @@
             })
             .catch((err) => {
                 console.error('Lead submission error:', err);
-                // Even on network error, show success (no-cors responses are opaque anyway)
+                // Even on network error, show success to avoid blocking the lead flow.
                 submitBtn.innerText = 'Thank You!';
                 showToast('Thank you! Your request has been received.');
                 setTimeout(() => {

@@ -1,8 +1,10 @@
 // Vercel Serverless Function — Hamara Brand Super AI Bot Lead Submission
-// Receives structured lead data from the chatbot and forwards to the dedicated Google Sheet.
+// Receives structured lead data from the chatbot and stores it in Supabase.
 
-const GOOGLE_SCRIPT_URL = process.env.BOT_SHEET_URL || '';  // separate from main form's GOOGLE_SCRIPT_URL
-const SECRET_TOKEN      = process.env.GOOGLE_SCRIPT_SECRET || 'hb-lead-secret-2026-change-me';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://luulgqiqrlrvehwofqqt.supabase.co';
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const SUPABASE_TABLE = process.env.SUPABASE_TABLE || 'bot_leads';
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'hb-admin-2026-change-me';
 
 const ALLOWED_ORIGINS = [
   "https://hamarabrand.in",
@@ -26,8 +28,35 @@ function sanitize(val, max = 300) {
   return val.trim().substring(0, max);
 }
 
+function setJsonHeaders(res) {
+  res.setHeader('Content-Type', 'application/json');
+}
+
+async function supabaseRequest(path, options = {}) {
+  const response = await fetch(`${SUPABASE_URL}${path}`, {
+    ...options,
+    headers: {
+      apikey: SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  });
+
+  const text = await response.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = text;
+  }
+
+  return { response, data };
+}
+
 export default async function handler(req, res) {
   setCorsHeaders(req, res);
+  setJsonHeaders(res);
 
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
@@ -39,36 +68,43 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Insufficient lead data — name or phone required.' });
   }
 
-  if (!GOOGLE_SCRIPT_URL) {
-    console.error('[lead-bot] GOOGLE_SCRIPT_URL env var not set.');
-    return res.status(200).json({ result: 'error', message: 'Sheet URL not configured.' });
+  if (!SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('[lead-bot] SUPABASE_SERVICE_ROLE_KEY env var not set.');
+    return res.status(200).json({ result: 'error', message: 'Supabase service role key not configured.' });
   }
 
-  // Map to the Apps Script columns:
-  // Timestamp | Mode | Name | Company | Phone | Email | City | Budget | Service | Goal | Source | LeadScore
-  const params = new URLSearchParams({
-    _token:   SECRET_TOKEN,
-    botMode:  sanitize(body.botMode || 'buyer', 20),
-    name:     sanitize(body.name, 120),
-    company:  sanitize(body.company, 120),
-    phone:    sanitize(body.phone, 20),
-    email:    sanitize(body.email, 200),
-    city:     sanitize(body.city, 100),
-    budget:   sanitize(body.budget, 100),
-    service:  sanitize(body.service || body.category, 200),
+  const leadData = {
+    bot_mode: sanitize(body.botMode || 'buyer', 20),
+    name: sanitize(body.name, 120),
+    company: sanitize(body.company, 120),
+    phone: sanitize(body.phone, 20),
+    email: sanitize(body.email, 200),
+    city: sanitize(body.city, 100),
+    budget: sanitize(body.budget, 100),
+    service: sanitize(body.service || body.category, 200),
     objective: sanitize(body.objective || body.goal, 200),
-  });
+    source: sanitize(body.source || 'super-ai-bot', 80),
+    extras: body.extras && typeof body.extras === 'object' ? body.extras : {},
+  };
 
   try {
-    console.log('[lead-bot] Submitting to Google Sheet. Name:', body.name, '| Mode:', body.botMode);
+    console.log('[lead-bot] Submitting to Supabase. Name:', body.name, '| Mode:', body.botMode);
 
-    // Use GET with query params — most reliable for Google Apps Script Web Apps
-    // (avoids POST→GET redirect issues that lose the body)
-    const url = `${GOOGLE_SCRIPT_URL}?${params.toString()}`;
-    const response = await fetch(url, { redirect: 'follow' });
-    const text = await response.text();
-    console.log('[lead-bot] Sheet response:', response.status, text.substring(0, 500));
-    return res.status(200).json({ result: 'success', sheetStatus: response.status, sheetBody: text.substring(0, 300) });
+    const { response, data } = await supabaseRequest(`/rest/v1/${SUPABASE_TABLE}`, {
+      method: 'POST',
+      headers: {
+        Prefer: 'return=representation',
+      },
+      body: JSON.stringify([leadData]),
+    });
+
+    if (!response.ok) {
+      console.error('[lead-bot] Supabase insert error:', response.status, JSON.stringify(data));
+      return res.status(200).json({ result: 'error', message: 'Supabase insert failed.', details: data });
+    }
+
+    console.log('[lead-bot] Supabase insert success:', response.status);
+    return res.status(200).json({ result: 'success', record: Array.isArray(data) ? data[0] : data });
   } catch (err) {
     console.error('[lead-bot] Submission error:', err.message || err);
     return res.status(200).json({ result: 'error', message: err.message });
