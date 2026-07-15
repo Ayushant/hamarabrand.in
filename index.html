@@ -974,6 +974,7 @@
 
         // ── Lead Form Submission — direct to Google Apps Script ──
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2SuumH1jsCbaJzBk8Q543hBtLmQWgVxj8OMahdMlCtQLuGHJW4kvX_o6TXVD6oHFc/exec';
+        const DIRECT_LEAD_ENDPOINT = '/api/lead-bot';
 
         document.getElementById('lead-gen-modal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1018,7 +1019,7 @@
                 source: 'website-direct'
             };
 
-            fetch(LEAD_BOT_ENDPOINT, {
+            fetch(DIRECT_LEAD_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
