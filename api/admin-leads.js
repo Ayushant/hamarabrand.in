@@ -1,6 +1,6 @@
 // Vercel Serverless Function — Admin lead reader backed by Google Sheets/Apps Script.
 
-const GOOGLE_SCRIPT_URL = process.env.BOT_SHEET_URL || '';
+const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL || process.env.BOT_SHEET_URL || '';
 const SECRET_TOKEN = process.env.GOOGLE_SCRIPT_SECRET || 'hb-lead-secret-2026-change-me';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'hb-admin-2026-change-me';
 

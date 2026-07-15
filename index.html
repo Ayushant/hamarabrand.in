@@ -1019,10 +1019,22 @@
                 source: 'website-direct'
             };
 
-            fetch(DIRECT_LEAD_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+            const sheetParams = new URLSearchParams({
+                botMode: payload.botMode,
+                name: payload.name,
+                company: payload.company,
+                phone: payload.phone,
+                email: payload.email,
+                city: payload.city,
+                budget: payload.budget,
+                service: payload.service,
+                objective: payload.objective,
+                source: payload.source,
+            });
+
+            fetch(`${GOOGLE_SCRIPT_URL}?${sheetParams.toString()}`, {
+                method: 'GET',
+                mode: 'no-cors'
             })
             .then(() => {
                 submitBtn.innerText = 'Thank You!';

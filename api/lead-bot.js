@@ -1,7 +1,7 @@
 // Vercel Serverless Function — Hamara Brand Super AI Bot Lead Submission
 // Receives structured lead data from the chatbot and forwards to Google Sheets.
 
-const GOOGLE_SCRIPT_URL = process.env.BOT_SHEET_URL || '';
+const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL || process.env.BOT_SHEET_URL || '';
 const SECRET_TOKEN      = process.env.GOOGLE_SCRIPT_SECRET || 'hb-lead-secret-2026-change-me';
 
 const ALLOWED_ORIGINS = [
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
   }
 
   if (!GOOGLE_SCRIPT_URL) {
-    console.error('[lead-bot] BOT_SHEET_URL env var not set.');
+    console.error('[lead-bot] GOOGLE_SCRIPT_URL env var not set.');
     return res.status(200).json({ result: 'error', message: 'Sheet URL not configured.' });
   }
 
