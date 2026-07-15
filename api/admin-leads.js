@@ -1,8 +1,7 @@
-// Vercel Serverless Function — Admin lead reader backed by Supabase.
+// Vercel Serverless Function — Admin lead reader backed by Google Sheets/Apps Script.
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://luulgqiqrlrvehwofqqt.supabase.co';
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const SUPABASE_TABLE = process.env.SUPABASE_TABLE || 'bot_leads';
+const GOOGLE_SCRIPT_URL = process.env.BOT_SHEET_URL || '';
+const SECRET_TOKEN = process.env.GOOGLE_SCRIPT_SECRET || 'hb-lead-secret-2026-change-me';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'hb-admin-2026-change-me';
 
 function setCorsHeaders(req, res) {
@@ -13,14 +12,15 @@ function setCorsHeaders(req, res) {
   res.setHeader('Vary', 'Origin');
 }
 
-async function supabaseRequest(path) {
-  const response = await fetch(`${SUPABASE_URL}${path}`, {
-    headers: {
-      apikey: SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-    },
-  });
+async function fetchSheetData(limit, offset) {
+  const url = `${GOOGLE_SCRIPT_URL}?${new URLSearchParams({
+    _token: SECRET_TOKEN,
+    action: 'list',
+    limit: String(limit),
+    offset: String(offset),
+  }).toString()}`;
 
+  const response = await fetch(url, { redirect: 'follow' });
   const text = await response.text();
   let data = null;
   try {
@@ -38,8 +38,8 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (!SUPABASE_SERVICE_ROLE_KEY) {
-    return res.status(500).json({ error: 'Supabase service role key not configured.' });
+  if (!GOOGLE_SCRIPT_URL) {
+    return res.status(500).json({ error: 'Sheet URL not configured.' });
   }
 
   const adminToken = req.headers['x-admin-token'] || req.query.token || '';
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
   const limit = Math.min(Number(req.query.limit || 100), 500);
   const offset = Math.max(Number(req.query.offset || 0), 0);
 
-  const { response, data } = await supabaseRequest(`/rest/v1/${SUPABASE_TABLE}?select=*&order=created_at.desc&limit=${limit}&offset=${offset}`);
+  const { response, data } = await fetchSheetData(limit, offset);
 
   if (!response.ok) {
     return res.status(response.status).json({ error: 'Failed to load leads', details: data });

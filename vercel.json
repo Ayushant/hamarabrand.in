@@ -11,6 +11,9 @@
     },
     "api/lead-bot.js": {
       "maxDuration": 30
+    },
+    "api/admin-leads.js": {
+      "maxDuration": 30
     }
   },
   "redirects": [
@@ -28,14 +31,6 @@
     {
       "source": "/api/lead-bot",
       "destination": "/api/lead-bot.js"
-    },
-    {
-      "source": "/api/admin-leads",
-      "destination": "/api/admin-leads.js"
-    },
-    {
-      "source": "/admin",
-      "destination": "/admin/index.html"
     }
   ],
   "headers": [

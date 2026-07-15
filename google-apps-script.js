@@ -7,11 +7,15 @@
  * 3. Deploy > New Deployment > Web App
  *    - Execute as: Me
  *    - Who has access: Anyone
- * 4. Copy the Web App URL
+ * 4. Copy the Web App URL:
+ *    https://script.google.com/macros/s/AKfycbw_wTzRXMOLz2jKNUJ-4_KDZXR351c_Ct4nwrRcB08NoZEMGXGZRUseIJNlERD-N0XB/exec
  * 5. In Vercel > Settings > Environment Variables, add:
  *    - GOOGLE_SCRIPT_URL  = <paste Web App URL here>
  *    - GOOGLE_SCRIPT_SECRET = hb-lead-secret-2026-change-me
  * 6. Redeploy on Vercel
+ *
+ * Deployment ID:
+ * AKfycbw_wTzRXMOLz2jKNUJ-4_KDZXR351c_Ct4nwrRcB08NoZEMGXGZRUseIJNlERD-N0XB
  *
  * The script auto-creates a "BotLeads" tab on first run.
  * Columns: Timestamp | Mode | Name | Company | Phone | Email | City | Budget | Service | Goal | Source | LeadScore
@@ -95,7 +99,40 @@ function doPost(e) {
 
 /** Handle GET requests — used by lead-bot API to avoid POST redirect issues */
 function doGet(e) {
-  return doPost(e);
+  try {
+    const p = e.parameter || {};
+    if ((p.action || '').toLowerCase() === 'list') {
+      const ss    = SpreadsheetApp.getActiveSpreadsheet();
+      const sheet = ss.getSheetByName(TAB_NAME);
+
+      if (!sheet) {
+        return jsonResp(200, { result: 'success', data: [] });
+      }
+
+      const values = sheet.getDataRange().getValues();
+      if (values.length <= 1) {
+        return jsonResp(200, { result: 'success', data: [] });
+      }
+
+      const headers = values[0].map(String);
+      const rows = values.slice(1).map(row => {
+        const item = {};
+        headers.forEach((header, index) => {
+          item[toSnakeCase(header)] = row[index];
+        });
+        return item;
+      }).reverse();
+
+      const limit = Math.min(parseInt(p.limit || '100', 10) || 100, 500);
+      const offset = Math.max(parseInt(p.offset || '0', 10) || 0, 0);
+      return jsonResp(200, { result: 'success', data: rows.slice(offset, offset + limit) });
+    }
+
+    return doPost(e);
+  } catch (err) {
+    console.error('doGet error:', err);
+    return jsonResp(500, { result: 'error', error: err.message });
+  }
 }
 
 function sanitize(val, max) {
@@ -107,4 +144,12 @@ function jsonResp(code, obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function toSnakeCase(text) {
+  return String(text || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
 }
