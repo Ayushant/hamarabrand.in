@@ -1033,8 +1033,7 @@
             });
 
             fetch(`${GOOGLE_SCRIPT_URL}?${sheetParams.toString()}`, {
-                method: 'GET',
-                mode: 'no-cors'
+                method: 'GET'
             })
             .then(() => {
                 submitBtn.innerText = 'Thank You!';
