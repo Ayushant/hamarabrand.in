@@ -1011,7 +1011,7 @@
                 name: nameInput,
                 company: form.querySelector('[name="company"]').value.trim(),
                 phone: phoneInput,
-                email: form.querySelector('[name="email"]').value.trim(),
+                email: form.querySelector('[name="email"]')?.value.trim() || '',
                 city: form.querySelector('[name="city"]').value.trim(),
                 budget: form.querySelector('[name="budget"]').value,
                 service: form.querySelector('[name="service"]').value.trim(),
