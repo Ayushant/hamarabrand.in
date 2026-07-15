@@ -8,14 +8,14 @@
  *    - Execute as: Me
  *    - Who has access: Anyone
  * 4. Copy the Web App URL:
- *    https://script.google.com/macros/s/AKfycbw_wTzRXMOLz2jKNUJ-4_KDZXR351c_Ct4nwrRcB08NoZEMGXGZRUseIJNlERD-N0XB/exec
+ *    https://script.google.com/macros/s/AKfycbzMIAanrFc2jXDGiFj9UFHK2FgYo_SXZ-ZOF6XoLIt3IEH0Lra8-lLYQgoTQB16bCDM/exec
  * 5. In Vercel > Settings > Environment Variables, add:
  *    - GOOGLE_SCRIPT_URL  = <paste Web App URL here>
  *    - GOOGLE_SCRIPT_SECRET = hb-lead-secret-2026-change-me
  * 6. Redeploy on Vercel
  *
  * Deployment ID:
- * AKfycbw_wTzRXMOLz2jKNUJ-4_KDZXR351c_Ct4nwrRcB08NoZEMGXGZRUseIJNlERD-N0XB
+ * AKfycbzMIAanrFc2jXDGiFj9UFHK2FgYo_SXZ-ZOF6XoLIt3IEH0Lra8-lLYQgoTQB16bCDM
  *
  * Tabs:
  *  - "BotLeads"      — AI chatbot leads (Timestamp | Mode | Name | Company | Phone | Email | City | Budget | Service | Goal | Source | LeadScore)
