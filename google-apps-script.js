@@ -17,19 +17,26 @@
  * Deployment ID:
  * AKfycbw_wTzRXMOLz2jKNUJ-4_KDZXR351c_Ct4nwrRcB08NoZEMGXGZRUseIJNlERD-N0XB
  *
- * The script auto-creates a "BotLeads" tab on first run.
- * Columns: Timestamp | Mode | Name | Company | Phone | Email | City | Budget | Service | Goal | Source | LeadScore
+ * Tabs:
+ *  - "BotLeads"      — AI chatbot leads (Timestamp | Mode | Name | Company | Phone | Email | City | Budget | Service | Goal | Source | LeadScore)
+ *  - "ProposalLeads" — Custom proposal form submissions (Timestamp | Source | Name | Company | Phone | City | Service | Budget | Duration | LeadScore)
  */
 
 const SECRET   = 'hb-lead-secret-2026-change-me';
 const TAB_NAME = 'BotLeads';
+const PROPOSAL_TAB_NAME = 'ProposalLeads';
 
 const HEADERS = [
   'Timestamp', 'Mode', 'Name', 'Company', 'Phone', 'Email',
   'City', 'Budget', 'Service/Category', 'Goal/Objective', 'Source', 'Lead Score'
 ];
 
-/** Run this ONCE manually from Apps Script editor to create the sheet + headers */
+const PROPOSAL_HEADERS = [
+  'Timestamp', 'Source', 'Name', 'Company', 'Phone',
+  'City', 'Service Needed', 'Monthly Budget', 'Duration', 'Lead Score'
+];
+
+/** Run this ONCE manually from Apps Script editor to create the BotLeads sheet + headers */
 function setup() {
   const ss    = SpreadsheetApp.getActiveSpreadsheet();
   let   sheet = ss.getSheetByName(TAB_NAME);
@@ -50,9 +57,32 @@ function setup() {
   SpreadsheetApp.getUi().alert('BotLeads tab created with all columns!');
 }
 
+/** Run this ONCE manually to create the ProposalLeads sheet + headers */
+function setupProposals() {
+  const ss    = SpreadsheetApp.getActiveSpreadsheet();
+  let   sheet = ss.getSheetByName(PROPOSAL_TAB_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(PROPOSAL_TAB_NAME);
+  }
+  sheet.getRange(1, 1, 1, PROPOSAL_HEADERS.length).setValues([PROPOSAL_HEADERS]);
+  sheet.getRange(1, 1, 1, PROPOSAL_HEADERS.length)
+       .setFontWeight('bold')
+       .setBackground('#FF6F00')
+       .setFontColor('#ffffff')
+       .setFontSize(11);
+  sheet.setFrozenRows(1);
+  for (let i = 1; i <= PROPOSAL_HEADERS.length; i++) sheet.autoResizeColumn(i);
+  SpreadsheetApp.getUi().alert('ProposalLeads tab created with all columns!');
+}
+
 function doPost(e) {
   try {
     const p = e.parameter;
+
+    // ── Route proposal form submissions to ProposalLeads tab ──
+    if ((p._tab || '').toLowerCase() === 'proposal') {
+      return handleProposalLead(p);
+    }
 
     // ── Get or create BotLeads tab ──
     const ss    = SpreadsheetApp.getActiveSpreadsheet();
@@ -97,10 +127,57 @@ function doPost(e) {
   }
 }
 
+/** Handle proposal form leads — stored in ProposalLeads tab */
+function handleProposalLead(p) {
+  try {
+    const ss    = SpreadsheetApp.getActiveSpreadsheet();
+    let   sheet = ss.getSheetByName(PROPOSAL_TAB_NAME);
+    if (!sheet) {
+      sheet = ss.insertSheet(PROPOSAL_TAB_NAME);
+      sheet.appendRow(PROPOSAL_HEADERS);
+      sheet.getRange(1, 1, 1, PROPOSAL_HEADERS.length)
+           .setFontWeight('bold')
+           .setBackground('#FF6F00')
+           .setFontColor('#ffffff');
+      sheet.setFrozenRows(1);
+    }
+
+    // ── Score the proposal lead ──
+    const budget = (p.budget || '').toLowerCase();
+    let score = 'COLD';
+    if (budget.includes('5,00,000') || budget.includes('5l') || budget.includes('cr')) score = 'HOT';
+    else if (budget.includes('2,00,000') || budget.includes('2l') || budget.includes('3l') || budget.includes('4l')) score = 'WARM';
+
+    sheet.appendRow([
+      new Date(),
+      sanitize(p.source   || 'website-proposal-form', 50),
+      sanitize(p.name     || '', 120),
+      sanitize(p.company  || '', 120),
+      sanitize(p.phone    || '', 20),
+      sanitize(p.city     || '', 100),
+      sanitize(p.service  || p.category || '', 200),
+      sanitize(p.budget   || '', 100),
+      sanitize(p.duration || '', 100),
+      score
+    ]);
+
+    return jsonResp(200, { result: 'success', tab: 'ProposalLeads', score });
+  } catch (err) {
+    console.error('handleProposalLead error:', err);
+    return jsonResp(500, { result: 'error', error: err.message });
+  }
+}
+
 /** Handle GET requests — used by lead-bot API to avoid POST redirect issues */
 function doGet(e) {
   try {
     const p = e.parameter || {};
+
+    // ── Route proposal form GET requests to ProposalLeads tab ──
+    if ((p._tab || '').toLowerCase() === 'proposal') {
+      return handleProposalLead(p);
+    }
+
     if ((p.action || '').toLowerCase() === 'list') {
       const ss    = SpreadsheetApp.getActiveSpreadsheet();
       const sheet = ss.getSheetByName(TAB_NAME);

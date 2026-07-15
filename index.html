@@ -972,9 +972,8 @@
             }
         });
 
-        // ── Lead Form Submission — direct to Google Apps Script ──
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2SuumH1jsCbaJzBk8Q543hBtLmQWgVxj8OMahdMlCtQLuGHJW4kvX_o6TXVD6oHFc/exec';
-        const DIRECT_LEAD_ENDPOINT = '/api/lead-bot';
+        // ── Proposal Form Submission — direct to Google Apps Script ──
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_wTzRXMOLz2jKNUJ-4_KDZXR351c_Ct4nwrRcB08NoZEMGXGZRUseIJNlERD-N0XB/exec';
 
         document.getElementById('lead-gen-modal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1006,59 +1005,52 @@
             submitBtn.innerText = 'Submitting...';
             submitBtn.disabled = true;
 
-            const payload = {
-                botMode: 'buyer',
-                name: nameInput,
-                company: form.querySelector('[name="company"]').value.trim(),
-                phone: phoneInput,
-                email: form.querySelector('[name="email"]')?.value.trim() || '',
-                city: form.querySelector('[name="city"]').value.trim(),
-                budget: form.querySelector('[name="budget"]').value,
-                service: form.querySelector('[name="service"]').value.trim(),
-                objective: form.querySelector('[name="duration"]').value.trim(),
-                source: 'website-direct'
-            };
+            const durationVal = form.querySelector('[name="duration"]').value.trim();
 
+            // ── Submit directly to live Google Apps Script ──
+            // Using the existing BotLeads column mapping that the live script understands:
+            // botMode | name | company | phone | email | city | budget | service | objective | source
             const sheetParams = new URLSearchParams({
-                botMode: payload.botMode,
-                name: payload.name,
-                company: payload.company,
-                phone: payload.phone,
-                email: payload.email,
-                city: payload.city,
-                budget: payload.budget,
-                service: payload.service,
-                objective: payload.objective,
-                source: payload.source,
+                botMode:   'proposal-form',
+                name:      nameInput,
+                company:   form.querySelector('[name="company"]').value.trim(),
+                phone:     phoneInput,
+                email:     '',
+                city:      form.querySelector('[name="city"]').value.trim(),
+                budget:    form.querySelector('[name="budget"]').value,
+                service:   form.querySelector('[name="service"]').value.trim(),
+                objective: durationVal,
+                source:    'website-proposal-form',
             });
 
-            fetch(`${GOOGLE_SCRIPT_URL}?${sheetParams.toString()}`, {
-                method: 'GET'
-            })
-            .then(() => {
-                submitBtn.innerText = 'Thank You!';
-                showToast('Thank you! Your request has been received.');
-                setTimeout(() => {
-                    closeModal();
-                    form.reset();
-                    submitBtn.innerText = 'Submit Request';
-                    submitBtn.disabled = false;
-                    formLoadedAt = Date.now();
-                }, 1500);
-            })
-            .catch((err) => {
-                console.error('Lead submission error:', err);
-                // Even on network error, show success to avoid blocking the lead flow.
-                submitBtn.innerText = 'Thank You!';
-                showToast('Thank you! Your request has been received.');
-                setTimeout(() => {
-                    closeModal();
-                    form.reset();
-                    submitBtn.innerText = 'Submit Request';
-                    submitBtn.disabled = false;
-                    formLoadedAt = Date.now();
-                }, 1500);
-            });
+            const sheetUrl = `${GOOGLE_SCRIPT_URL}?${sheetParams.toString()}`;
+
+            let submitted = false;
+            try {
+                const resp = await fetch(sheetUrl, { method: 'GET' });
+                const txt  = await resp.text();
+                console.log('[proposal] Sheet response:', txt);
+                submitted = true;
+            } catch (err) {
+                console.error('[proposal] Sheet error:', err);
+                // Attempt no-cors fallback so browser doesn't block it
+                try {
+                    await fetch(sheetUrl, { method: 'GET', mode: 'no-cors' });
+                    submitted = true;
+                } catch (e2) {
+                    console.error('[proposal] no-cors fallback also failed:', e2);
+                }
+            }
+
+            submitBtn.innerText = 'Thank You! ✓';
+            showToast('✅ Proposal request received! We\'ll reach out within 2 hours.');
+            setTimeout(() => {
+                closeModal();
+                form.reset();
+                submitBtn.innerText = 'Submit Request';
+                submitBtn.disabled = false;
+                formLoadedAt = Date.now();
+            }, 1800);
         });
 
         // Helper function for toast notification
